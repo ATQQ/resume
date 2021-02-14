@@ -8,3 +8,6 @@ header{
 #page{
     border: none !important;
 }
+.left,.right{
+    display: none !important;
+}

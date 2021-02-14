@@ -7,3 +7,18 @@
   min-height: $height;
   border: 1px dashed #ddd;
 }
+.main {
+  display: flex;
+  justify-content: space-around;
+  .left {
+    flex: 1;
+    .tips {
+      padding-left: 2rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .right {
+    flex: 1;
+  }
+}

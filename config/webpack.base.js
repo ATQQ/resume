@@ -68,7 +68,9 @@ module.exports = {
         new webpack.HotModuleReplacementPlugin(),
         new CopyWebpackPlugin({
             patterns: [
-                { from: 'public' }
+                { from: 'public' },
+                { from: 'node_modules/jsoneditor/dist/jsoneditor.min.css', to: 'css' },
+                { from: 'node_modules/jsoneditor/dist/jsoneditor.min.js', to: 'js' },
             ]
         })
     ],

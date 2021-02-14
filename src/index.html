@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./css/print.css" media="print">
+    <link rel="stylesheet" href="./css/jsoneditor.min.css">
+    <script src="./js/jsoneditor.min.js"></script>
     <title>
         <%= htmlWebpackPlugin.options.title %>
     </title>
@@ -15,7 +17,26 @@
     <header>
         <%= htmlWebpackPlugin.options.pageNames %>
     </header>
-    <iframe id="page" name="page" src="" frameborder="0"></iframe>
+    <div class="main">
+        <div class="left">
+            <div class="tips">
+                <h2>导出pdf的方式</h2>
+                <ol>
+                    <li>鼠标右键，选择打印 或者 按ctrl + p</li>
+                    <li>在弹出的窗口点击更多设置</li>
+                    <li>边距选择无</li>
+                    <li>背景图像勾上</li>
+                    <li>点击保存即可</li>
+                </ol>
+            </div>
+        </div>
+        <iframe id="page" name="page" src="" frameborder="0"></iframe>
+        <div class="right">
+            <div id="jsonEditor">
+
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

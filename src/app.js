@@ -40,3 +40,10 @@ function initNav() {
 }
 
 initNav()
+
+function initEditor(id) {
+    const editor = new JSONEditor(document.getElementById(id), {})
+    return editor
+}
+
+const editor = initEditor('jsonEditor')
