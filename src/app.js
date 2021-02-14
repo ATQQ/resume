@@ -1,28 +1,29 @@
 import './assets/css/app.scss'
+import { createLink } from './utils'
 
 function initNav() {
     const pages = document.querySelector('header')
+    // 获取所有模板的链接
     const links = pages.innerText.split(',').map(pageName => {
-        const a = document.createElement('a')
-        a.href = `./pages/${pageName}`
-        a.text = pageName
-        return a
+        const link = createLink(pageName, `./pages/${pageName}`)
+        // iframe中打开
+        link.target = 'page'
+        return link
     })
+
+    // 插入自定义的链接
+    links.push(createLink('Github', 'https://github.com/ATQQ/resume', true))
+
+    // 插入所有模板的链接
     const t = document.createDocumentFragment()
     links.forEach(link => {
         t.appendChild(link)
     })
     pages.innerHTML = ''
     pages.append(t)
-    const page = document.getElementById('page')
 
-    pages.addEventListener('click', function (e) {
-        if (e.target.tagName.toLowerCase() === 'a') {
-            const a = e.target
-            page.src = a.href
-        }
-        e.preventDefault()
-    })
+    // 默认页面
+    const page = document.getElementById('page')
     page.src = links[0].href
 }
 
