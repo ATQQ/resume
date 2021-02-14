@@ -1,0 +1,9 @@
+@import './base.scss';
+
+#page{
+    display: block;
+    margin: 0 auto;
+    width: $width;
+    min-height: $height;
+    border: 1px dashed #ddd;
+}
