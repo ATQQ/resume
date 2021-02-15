@@ -71,6 +71,7 @@ module.exports = {
                 { from: 'public' },
                 { from: 'node_modules/jsoneditor/dist/jsoneditor.min.css', to: 'css' },
                 { from: 'node_modules/jsoneditor/dist/jsoneditor.min.js', to: 'js' },
+                { from: 'node_modules/jsoneditor/dist/img', to: 'css/img' },
             ]
         })
     ],

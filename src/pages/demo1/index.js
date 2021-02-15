@@ -1,6 +1,6 @@
 import './index.scss'
-import { demo1 } from './../../constants/index'
-import { createLink } from './../../utils/index'
+import { createLink, getSchema } from './../../utils/index'
+
 function updateName(value) {
     document.getElementById('name').textContent = value
 }
@@ -102,7 +102,8 @@ function updateRightInfo(value) {
     }
 }
 
-function refresh(data) {
+window.refresh = function () {
+    const data = getSchema()
     const { name, position, avatar, left, right } = data || {}
     // 隐藏
     document.getElementById('resume').style.display = 'none'
@@ -119,4 +120,4 @@ function refresh(data) {
 }
 
 
-refresh(demo1)
+refresh()
