@@ -3,7 +3,7 @@
 const path = require('path');
 const webpack = require('webpack')
 const { getEntryAndPage, getHtml } = require('./fileUtil')
-
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 //清理打包
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -19,7 +19,7 @@ module.exports = {
         path: path.resolve(__dirname, './../dist')
     },
     resolve: {
-        extensions: [".js"],
+        extensions: [".js", '.jsx', '.vue'],
         alias: {
             "@": path.resolve(__dirname, '../src'),
         },
@@ -49,9 +49,13 @@ module.exports = {
                 }
             },
             {
-                test: /\.js?$/,
+                test: /\.jsx?$/,
                 use: 'babel-loader?cacheDirectory'
             },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+            }
         ]
     },
     // 配置插件
@@ -73,6 +77,7 @@ module.exports = {
                 { from: 'node_modules/jsoneditor/dist/jsoneditor.min.js', to: 'js' },
                 { from: 'node_modules/jsoneditor/dist/img', to: 'css/img' },
             ]
-        })
+        }),
+        new VueLoaderPlugin()
     ],
 }
