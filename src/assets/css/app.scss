@@ -10,19 +10,21 @@
 .main {
   display: flex;
   justify-content: space-around;
-
   .right {
     margin: 0 1rem;
-    flex: 1;
+  }
+  #jsonEditor {
+    min-width: 30rem;
   }
 }
 
 .btns {
   text-align: center;
 }
-#reset {
+#reset,
+#toggle {
   background-color: skyblue;
-  margin: 1rem auto;
+  margin: 1rem;
   border: none;
   color: #fff;
   padding: 0.5rem 1rem;

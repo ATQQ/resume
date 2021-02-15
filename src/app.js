@@ -60,6 +60,14 @@ function init() {
             refreshIframePage()
         }
     })
+    document.getElementById('toggle').addEventListener('click', function () {
+        const $editor = document.getElementById('jsonEditor')
+        if ($editor.getAttribute('hidden')) {
+            $editor.removeAttribute('hidden')
+        } else {
+            $editor.setAttribute('hidden', 'hidden')
+        }
+    })
 }
 
 function getPageKey() {
