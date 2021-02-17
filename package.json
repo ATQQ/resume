@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack serve  --config=config/webpack.config.js",
-    "build": "cross-env NODE_ENV=production webpack --config=config/webpack.config.js"
+    "build": "cross-env NODE_ENV=production webpack --config=config/webpack.config.js",
+    "compress": "bash ./build/compress.sh",
+    "deploy": "bash ./build/deploy.sh",
+    "oneStep": "npm run build && npm run compress && npm run deploy"
   },
   "repository": {
     "type": "git",
