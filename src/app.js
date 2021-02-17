@@ -20,6 +20,7 @@ function init() {
 
     // 插入自定义的链接
     links.push(createLink('Github', 'https://github.com/ATQQ/resume', true))
+    links.push(createLink('如何书写一份好的互联网校招简历', 'https://juejin.cn/post/6928390537946857479', true))
 
     // 插入所有模板的链接
     const t = document.createDocumentFragment()
