@@ -1,4 +1,4 @@
-export const demo1 = {
+const demo1 = {
     name: '张三',
     position: 'Web前端工程师',
     avatar: 'https://img.cdn.sugarat.top/mdImg/MTYxMzMwNTIyNzkyNA==613305227924',

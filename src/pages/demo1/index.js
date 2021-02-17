@@ -112,8 +112,8 @@ window.refresh = function () {
     updateName(name)
     updatePosition(position)
     updateAvatar(avatar)
-    updateLeftInfo(left)
-    updateRightInfo(right)
+    updateLeftInfo(left || [])
+    updateRightInfo(right || [])
 
     // 展示
     document.getElementById('resume').style.display = 'block'

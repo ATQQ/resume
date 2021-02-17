@@ -10,7 +10,7 @@ export function createLink(text, href, newTab = false) {
 
 export function getSchema(key = '') {
     if (!key) {
-        key = window.location.pathname
+        key = window.location.pathname.replace(/\/$/, '')
     }
     let data = localStorage.getItem(key)
     if (!data) {
@@ -27,7 +27,7 @@ export function getDefaultSchema(key) {
 
 export function setSchema(data, key = '') {
     if (!key) {
-        key = window.location.pathname
+        key = window.location.pathname.replace(/\/$/, '')
     }
     localStorage.setItem(key, JSON.stringify(data))
 }

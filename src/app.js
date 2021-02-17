@@ -71,7 +71,7 @@ function init() {
 }
 
 function getPageKey() {
-    return document.getElementById('page').contentWindow.location.pathname
+    return document.getElementById('page').contentWindow.location.pathname.replace(/\/$/, '')
 }
 
 function changeIframePage(src) {
