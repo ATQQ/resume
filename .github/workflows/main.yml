@@ -32,12 +32,15 @@ jobs:
       - name: Setup knownhosts
         run: ssh-keyscan ${{ secrets.REMOTE_ORIGIN }} >> ~/.ssh/known_hosts
 
-      # 压缩需要上传到服务器的文件
-      - name: install dependence
+      - name: Install dependence
         run: |
           echo 开始----安装依赖
           npm install
-      - name: compress dist
+      - name: Build
+        run: |
+          echo 开始----安装依赖
+          npm run build
+      - name: Compress dist
         run: |
           echo 开始----压缩
           npm run compress
@@ -52,7 +55,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.TARGET }}
       # 部署上传的包
-      - name: deploy
+      - name: Deploy
         run: |
           echo 开始----部署
           npm run deploy
