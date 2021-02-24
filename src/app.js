@@ -1,7 +1,10 @@
 import './assets/css/app.scss'
 import { createLink, getDefaultSchema, getSchema, setSchema, debounce } from './utils'
 import { navTitle } from './constants'
+import html2canvas from 'html2canvas'
 
+window.html2canvas = html2canvas;
+const { jsPDF } = window.jspdf;
 // json编辑器
 const editor = initEditor('jsonEditor')
 
@@ -51,6 +54,7 @@ function init() {
         editor.set(getSchema(getPageKey()))
     }
 
+    // 重置
     document.getElementById('reset').addEventListener('click', function () {
         if (confirm('是否初始化数据，这将会覆盖原有数据')) {
             const key = getPageKey()
@@ -60,6 +64,7 @@ function init() {
             refreshIframePage()
         }
     })
+    // 显隐
     document.getElementById('toggle').addEventListener('click', function () {
         const $editor = document.getElementById('jsonEditor')
         if ($editor.getAttribute('hidden')) {
@@ -68,8 +73,50 @@ function init() {
             $editor.setAttribute('hidden', 'hidden')
         }
     })
+    // 打印 - 导出pdf
     document.getElementById('print').addEventListener('click', function () {
         window.print()
+    })
+    // jsPDF - 导出pdf
+    document.getElementById('pdf').addEventListener('click', async function () {
+
+        // 图片转base64
+        const $imgs = document.getElementById('page').contentDocument.body.querySelectorAll('img')
+
+        await new Promise((res) => {
+            let _i = 0
+            for (const $img of $imgs) {
+                if (!$img.src.startsWith('http')) {
+                    _i++;
+                    if (_i === $imgs.length) {
+                        res()
+                    }
+                    return
+                }
+                var image = new Image();
+                image.src = $img.src + '?v=' + Math.random(); // 处理缓存
+                image.crossOrigin = "*";  // 支持跨域图片
+                image.onload = function () {
+                    _i += 1
+                    $img.src = getBase64Image(image)
+                    if (_i === $imgs.length) {
+                        res()
+                    }
+                }
+            }
+        })
+
+        // 导出pdf
+        html2canvas(document.getElementById('page').contentDocument.body).then(canvas => {
+            //返回图片dataURL，参数：图片格式和清晰度(0-1)
+            var pageData = canvas.toDataURL('image/jpeg', 1.0);
+            //方向默认竖直，尺寸ponits，格式a4[595.28,841.89]
+            var doc = new jsPDF('', 'pt', 'a4');
+            //addImage后两个参数控制添加图片的尺寸，此处将页面高度按照a4纸宽高比列进行压缩
+            // doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 592.28 / canvas.width * canvas.height);
+            doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 841.89);
+            doc.save(`${Date.now()}.pdf`);
+        });
     })
     // 简历部分适配屏幕
     window.addEventListener('resize', debounce((e) => {
@@ -78,6 +125,16 @@ function init() {
     window.addEventListener('load', (e) => {
         scalePage(e.currentTarget.innerWidth)
     })
+}
+
+function getBase64Image(img) {
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    var dataURL = canvas.toDataURL("image/png");  // 可选其他值 image/jpeg
+    return dataURL;
 }
 
 function scalePage(width) {

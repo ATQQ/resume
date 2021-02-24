@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./css/print.css" media="print">
     <link rel="stylesheet" href="./css/jsoneditor.min.css">
     <script src="./js/jsoneditor.min.js"></script>
+    <script src="https://cdn.staticfile.org/jspdf/2.3.0/jspdf.umd.min.js"></script>
     <title>
         <%= htmlWebpackPlugin.options.title %>
     </title>
@@ -21,7 +22,10 @@
         <iframe id="page" name="page" src="" frameborder="0"></iframe>
         <div class="right">
             <div class="btns">
-                <button id="print">打印（导出pdf）</button>
+                <button id="print">导出pdf（PC - 打印）</button>
+                <button id="pdf">导出pdf（jsPDF - 不支持超链接）</button>
+            </div>
+            <div class="btns">
                 <button id="reset">重置</button>
                 <button id="toggle">显示/隐藏</button>
             </div>

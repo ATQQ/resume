@@ -4,6 +4,9 @@ $height: 1120px;
   margin: 0;
   padding: 0;
 }
+a {
+  text-decoration: none;
+}
 header {
   text-align: center;
   background-color: #24292e;
@@ -12,7 +15,6 @@ header {
   a {
     color: #fff;
     font-weight: bold;
-    text-decoration: none;
     margin: 0 10px;
   }
 }

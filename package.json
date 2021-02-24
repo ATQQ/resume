@@ -46,6 +46,7 @@
     "webpack-merge": "^5.7.3"
   },
   "dependencies": {
+    "html2canvas": "^1.0.0-rc.7",
     "jsoneditor": "^9.1.10",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

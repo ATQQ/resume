@@ -35,20 +35,18 @@
 
 .btns {
   text-align: center;
-}
-#reset,
-#print,
-#toggle {
-  background-color: skyblue;
-  margin: 1rem;
-  border: none;
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  outline: none;
-  &:hover {
-    cursor: pointer;
-    transition: all 0.5s;
-    background-color: blue;
+  button {
+    background-color: skyblue;
+    margin: 1rem;
+    border: none;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    outline: none;
+    &:hover {
+      cursor: pointer;
+      transition: all 0.5s;
+      background-color: blue;
+    }
   }
 }
