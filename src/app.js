@@ -1,5 +1,5 @@
 import './assets/css/app.scss'
-import { createLink, getDefaultSchema, getSchema, setSchema } from './utils'
+import { createLink, getDefaultSchema, getSchema, setSchema, debounce } from './utils'
 import { navTitle } from './constants'
 
 // json编辑器
@@ -69,7 +69,34 @@ function init() {
             $editor.setAttribute('hidden', 'hidden')
         }
     })
+
+    // 简历部分适配屏幕
+    window.addEventListener('resize', debounce((e) => {
+        scalePage(e.currentTarget.innerWidth)
+    }, 500))
+    window.addEventListener('load', (e) => {
+        scalePage(e.currentTarget.innerWidth)
+    })
 }
+
+function scalePage(width) {
+    if (width < 800) {
+        const scale = (width / 800).toFixed(2)
+        document.getElementById('page').style.transform = `scale(${scale})`
+        const pageHeight = document.getElementById('page').getBoundingClientRect().height
+        document.getElementsByClassName('main')[0].style.height = `${pageHeight}px`
+    } else {
+        document.getElementById('page').style.transform = 'scale(1)'
+        document.getElementsByClassName('main')[0].style.height = ''
+    }
+
+    // jsonEditor
+    if (width <= 1200) {
+        const pageHeight = document.getElementById('page').getBoundingClientRect().height
+        document.getElementsByClassName('right')[0].style.top = `${pageHeight}px`
+    }
+}
+
 
 function getPageKey() {
     return document.getElementById('page').contentWindow.location.pathname.replace(/\/$/, '')

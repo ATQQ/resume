@@ -31,3 +31,17 @@ export function setSchema(data, key = '') {
     }
     localStorage.setItem(key, JSON.stringify(data))
 }
+
+/**
+ * 简单防抖
+ */
+export function debounce(fn, delay) {
+    let timer = null
+    return function () {
+        if (timer) {
+            clearTimeout(timer)
+        }
+        fn = fn.bind(this, ...arguments)
+        timer = setTimeout(fn, delay)
+    }
+}

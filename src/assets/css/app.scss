@@ -14,7 +14,22 @@
     margin: 0 1rem;
   }
   #jsonEditor {
-    min-width: 30rem;
+    max-width: calc(100vw - 900px);
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .main {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+    .right {
+      position: absolute;
+    }
+    #jsonEditor {
+      max-width: 100%;
+    }
   }
 }
 
