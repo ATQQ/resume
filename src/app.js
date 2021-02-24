@@ -13,9 +13,9 @@ const editor = initEditor('jsonEditor')
  * 初始化
  */
 function init() {
-    const pages = document.querySelector('header')
+    const $nav = document.querySelector('header nav')
     // 获取所有模板的链接
-    const links = pages.innerText.split(',').map(pageName => {
+    const links = $nav.innerText.split(',').map(pageName => {
         const link = createLink(navTitle[pageName] || pageName, `./pages/${pageName}`)
         // iframe中打开
         return link
@@ -30,14 +30,26 @@ function init() {
     links.forEach(link => {
         t.appendChild(link)
     })
-    pages.innerHTML = ''
-    pages.append(t)
+    $nav.innerHTML = ''
+    $nav.append(t)
 
     // 默认页面
     changeIframePage(links[0].href)
 
+    // 导航栏
+    document.getElementById('open-menu').addEventListener('click', function () {
+        if (!$nav.style.display) {
+            $nav.style.display = 'block'
+            return
+        }
+        if ($nav.style.display === 'block') {
+            $nav.style.display = 'none'
+        } else {
+            $nav.style.display = 'block'
+        }
+    })
     // 刷新iframe中的链接
-    pages.addEventListener('click', function (e) {
+    $nav.addEventListener('click', function (e) {
         if (e.target?.target !== 'page') {
             return
         }
@@ -118,13 +130,20 @@ function init() {
             doc.save(`${Date.now()}.pdf`);
         });
     })
-    // 简历部分适配屏幕
+
+    // 适配屏幕
     window.addEventListener('resize', debounce((e) => {
-        scalePage(e.currentTarget.innerWidth)
+        // 导航栏 后续优化
+        const width = e.currentTarget.innerWidth
+        if (width > 900) {
+            $nav.style.display = ''
+        }
+        scalePage(width)
     }, 500))
     window.addEventListener('load', (e) => {
         scalePage(e.currentTarget.innerWidth)
     })
+
 }
 
 function getBase64Image(img) {

@@ -16,7 +16,17 @@
 
 <body>
     <header>
-        <%= htmlWebpackPlugin.options.pageNames %>
+        <button id="open-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div id="tips">
+            ← Resume 在线简历生成
+        </div>
+        <nav id="nav">
+            <%= htmlWebpackPlugin.options.pageNames %>
+        </nav>
     </header>
     <div class="main">
         <iframe id="page" name="page" src="" frameborder="0"></iframe>
