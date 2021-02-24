@@ -8,7 +8,12 @@ header{
 #page{
     border: none !important;
     margin:0 !important;
+    transform: scale(1) !important;
 }
 .left,.right{
     display: none !important;
+}
+
+@page {
+    size: A4 portrait;
 }

@@ -51,8 +51,7 @@ function init() {
         editor.set(getSchema(getPageKey()))
     }
 
-    const $resetBtn = document.getElementById('reset')
-    $resetBtn.addEventListener('click', function () {
+    document.getElementById('reset').addEventListener('click', function () {
         if (confirm('是否初始化数据，这将会覆盖原有数据')) {
             const key = getPageKey()
             const data = getDefaultSchema(key)
@@ -69,7 +68,9 @@ function init() {
             $editor.setAttribute('hidden', 'hidden')
         }
     })
-
+    document.getElementById('print').addEventListener('click', function () {
+        window.print()
+    })
     // 简历部分适配屏幕
     window.addEventListener('resize', debounce((e) => {
         scalePage(e.currentTarget.innerWidth)
