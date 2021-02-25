@@ -122,6 +122,7 @@ window.refresh = function () {
     document.getElementById('resume').style.display = 'none'
 
     // 更新数据
+    // TODO: 做一层diff
     updateName(name)
     updatePosition(position)
     updateAvatar(avatar)

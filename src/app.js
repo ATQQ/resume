@@ -95,6 +95,21 @@ function init() {
                 editor.searchBox.dom.input.querySelector('.jsoneditor-next').dispatchEvent(new Event('click'))
             }
         })
+
+        // 监听改变的DOM元素，使其高亮
+        document.getElementById('page').contentDocument.body.addEventListener('DOMNodeInserted', function (e) {
+            if (!e.target.tagName) {
+                e.relatedNode.style.backgroundColor = '#fff566'
+                setTimeout(() => {
+                    e.relatedNode.style.backgroundColor = ''
+                }, 500)
+                return
+            }
+            e.target.style.backgroundColor = '#fff566'
+            setTimeout(() => {
+                e.target.style.backgroundColor = ''
+            }, 500)
+        })
     }
 
     // 重置

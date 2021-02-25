@@ -2,7 +2,6 @@
 
 #page {
   display: block;
-  margin-left: 1rem;
   width: $width;
   min-height: $height;
   border: 1px dashed #ddd;
@@ -10,6 +9,7 @@
 .main {
   display: flex;
   justify-content: space-around;
+  padding: 0 0.5rem;
   .right {
     margin: 0 1rem;
   }
@@ -24,6 +24,7 @@
     align-items: center;
     flex-direction: column;
     position: relative;
+    padding: 0;
     .right {
       position: absolute;
     }
