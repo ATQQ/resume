@@ -122,6 +122,16 @@ const demo1 = {
     ]
 }
 
+const demo2 = {
+    name: 'Vue编写',
+    position: '职位',
+    dataString: [
+        'dsdsd',
+        'dsdsds',
+        '我是中文内容'
+    ]
+}
 export default {
-    demo1
+    demo1,
+    demo2
 }

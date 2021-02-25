@@ -74,7 +74,7 @@ function init() {
         editor.searchBox.activeResult.node.value = this.value
         editor.refresh()
         updatePage(editor.get())
-    }, 200))
+    }, 100))
     document.getElementById('page').onload = function (e) {
         // 其余逻辑
         editor.set(getSchema(getPageKey()))
@@ -96,20 +96,6 @@ function init() {
             }
         })
 
-        // 监听改变的DOM元素，使其高亮
-        document.getElementById('page').contentDocument.body.addEventListener('DOMNodeInserted', function (e) {
-            if (!e.target.tagName) {
-                e.relatedNode.style.backgroundColor = '#fff566'
-                setTimeout(() => {
-                    e.relatedNode.style.backgroundColor = ''
-                }, 500)
-                return
-            }
-            e.target.style.backgroundColor = '#fff566'
-            setTimeout(() => {
-                e.target.style.backgroundColor = ''
-            }, 500)
-        })
     }
 
     // 重置
@@ -250,8 +236,13 @@ function refreshIframePage() {
 
 
 function updatePage(data) {
+    const observer = initObserver()
     setSchema(data, getPageKey())
     refreshIframePage()
+    // 因为mutationObserver是宏任务所以这里设为0
+    setTimeout(() => {
+        observer.disconnect()
+    }, 0)
 }
 
 function initEditor(id) {
@@ -265,6 +256,25 @@ function initEditor(id) {
         }
     })
     return editor
+}
+
+function initObserver() {
+    const config = { childList: true, subtree: true, characterData: true };
+    const observer = new MutationObserver(debounce(function (mutationsList, observer) {
+        for (const e of mutationsList) {
+            let target = e.target
+            if (e.type === 'characterData') {
+                target = e.target.parentElement
+            }
+            target.style.backgroundColor = '#fff566'
+            setTimeout(() => {
+                target.style.backgroundColor = ''
+            }, 500)
+        }
+    }, 100))
+
+    observer.observe(document.getElementById('page').contentDocument.body, config);
+    return observer
 }
 
 init()
