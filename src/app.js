@@ -61,9 +61,35 @@ function init() {
         }
     })
 
+    const $textarea = document.getElementById('domContext')
+    $textarea.addEventListener('input', debounce(function () {
+        if (!editor.searchBox?.activeResult?.node) {
+            return
+        }
+        editor.searchBox.activeResult.node.value = this.value
+        editor.refresh()
+        updatePage(editor.get())
+    }, 200))
     document.getElementById('page').onload = function (e) {
         // 其余逻辑
         editor.set(getSchema(getPageKey()))
+
+        // 获取点击到的内容
+        document.getElementById('page').contentDocument.body.addEventListener('click', function (e) {
+            const clickText = e.target.textContent.trim()
+            editor.searchBox.dom.search.value = clickText
+            // 更新到textarea
+            $textarea.value = clickText
+            editor.searchBox.dom.search.dispatchEvent(new Event('change'))
+            document.getElementById('tipsNum').textContent = editor.searchBox.results.length
+            for (const r of editor.searchBox.results) {
+                if (r.node.value === clickText) {
+                    $textarea.focus()
+                    return
+                }
+                editor.searchBox.dom.input.querySelector('.jsoneditor-next').dispatchEvent(new Event('click'))
+            }
+        })
     }
 
     // 重置
@@ -74,6 +100,7 @@ function init() {
             setSchema(data, key)
             editor.set(data)
             refreshIframePage()
+            $textarea.value = ''
         }
     })
     // 显隐
@@ -202,17 +229,19 @@ function refreshIframePage() {
 }
 
 
+function updatePage(data) {
+    setSchema(data, getPageKey())
+    refreshIframePage()
+}
 
 function initEditor(id) {
     let timer = null
     const editor = new JSONEditor(document.getElementById(id), {
         onChangeJSON(data) {
-            setSchema(data, getPageKey())
-            // 做个简单的页面更新防抖
             if (timer) {
                 clearTimeout(timer)
             }
-            timer = setTimeout(refreshIframePage, 1000)
+            setTimeout(updatePage, 200, data)
         }
     })
     return editor

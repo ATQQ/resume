@@ -31,6 +31,18 @@
     <div class="main">
         <iframe id="page" name="page" src="" frameborder="0"></iframe>
         <div class="right">
+            <div class="input-container">
+                <textarea id="domContext" style="width: 100%;margin: 0 auto;margin-top: 0.5rem;"
+                    placeholder="这里显示点击的内容，修改内容回直接同步" rows="3"></textarea>
+                <div style="text-align: center;">
+                    <p>
+                        <span id="tipsNum" style="color: red;">0</span>
+                        个包含此内容的节点
+                    </p>
+                    <p>节点内容进行模糊匹配</p>
+                    <p>默认联动的是内容完全相匹配的第一个节点</p>
+                </div>
+            </div>
             <div class="btns">
                 <button id="print">导出pdf（PC - 打印）</button>
                 <button id="pdf">导出pdf（jsPDF - 不支持超链接）</button>
