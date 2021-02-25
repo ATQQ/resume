@@ -13,8 +13,20 @@ function updateAvatar(value) {
         $avatar.style.display = 'none'
         return
     }
+    $avatar.querySelector('img').style.transform = `scale(1) translateY(0px)`
     $avatar.style.display = 'block'
     $avatar.querySelector('img').src = value
+    const $img = new Image()
+    $img.src = value
+    $img.onload = function () {
+        const width = $avatar.querySelector('img').getBoundingClientRect().width
+        const containerWidth = 160;
+        if (width < containerWidth) {
+            $avatar.querySelector('img').style.transform = `scale(${containerWidth / width}) translateY(${(containerWidth - width) / 2}px)`
+        } else {
+            $avatar.querySelector('img').style.transform = `scale(1) translateY(0px)`
+        }
+    }
 }
 
 function createDom(des) {
