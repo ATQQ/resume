@@ -115,6 +115,12 @@ function init() {
                         res()
                     }
                 }
+                image.onerror = function () {
+                    _i += 1
+                    if (_i === $imgs.length) {
+                        res()
+                    }
+                }
             }
         })
 

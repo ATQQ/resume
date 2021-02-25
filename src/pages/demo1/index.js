@@ -11,6 +11,7 @@ function updateAvatar(value) {
     const $avatar = document.getElementById('avatar')
     if (!value) {
         $avatar.style.display = 'none'
+        return
     }
     $avatar.style.display = 'block'
     $avatar.querySelector('img').src = value

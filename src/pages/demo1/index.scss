@@ -2,6 +2,12 @@
 $themeColor: #b9ffe6;
 $themeColorDeep: #7bffd1;
 $panelColor: #eee;
+html,
+body,
+#resume {
+  height: 100%;
+  overflow: hidden;
+}
 #resume {
   margin: 0 auto;
   padding: 0;
@@ -54,6 +60,7 @@ html ::-webkit-scrollbar {
 main {
   margin-top: 0.3rem;
   height: 100%;
+  overflow: hidden;
   .left,
   .right {
     float: left;
@@ -62,6 +69,9 @@ main {
     width: 40%;
     height: 100%;
     background-color: $panelColor;
+    #leftInfo {
+      padding-bottom: 1.5rem;
+    }
   }
   .right {
     height: 100%;
@@ -73,12 +83,11 @@ main {
   width: 10rem;
   height: 10rem;
   overflow: hidden;
-  margin: 1rem auto;
+  margin: 1rem auto 0 auto;
   border-radius: 50%;
   border: 0.2rem solid #999999;
+  text-align: center;
   img {
-    border-radius: 50%;
-    width: 100%;
     height: 100%;
   }
 }
@@ -86,7 +95,7 @@ main {
 .info-item {
   padding-left: 3rem;
   padding-right: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
   .title {
     width: 82%;
     font-size: 1.5rem;
