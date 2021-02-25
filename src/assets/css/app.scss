@@ -109,3 +109,15 @@ header {
     }
   }
 }
+
+#domContext {
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  &:focus {
+    box-shadow: 0 0 20px yellow;
+    border: none;
+  }
+}
