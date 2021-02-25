@@ -50,6 +50,11 @@ function init() {
     })
     // 刷新iframe中的链接
     $nav.addEventListener('click', function (e) {
+        if (e.target.tagName.toLowerCase() === 'a') {
+            if ($nav.style.display) {
+                $nav.style.display = 'none'
+            }
+        }
         if (e.target?.target !== 'page') {
             return
         }
