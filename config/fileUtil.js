@@ -117,11 +117,29 @@ function getEntryAndPage(baseDir = 'src/pages') {
     }
 }
 
+/**
+ * 自动创建src/constants/schema.js 文件
+ */
+function writeSchemaJS() {
+    const files = getDirFilesWithFullPath('src/constants/schema')
+    const { dir } = path.parse(files[0])
+    const targetFilePath = path.resolve(dir, '../', 'schema.js')
+    const names = files.map(file => path.parse(file).name)
+    const res = `${names.map(n => {
+        return `import ${n} from './schema/${n}'`
+    }).join('\n')}
+
+export default{
+    ${names.join(',')}
+}`
+    fs.writeFileSync(targetFilePath, res)
+}
 module.exports = {
     getDirFiles,
     getDirFileByType,
     getDirFilesWithFullPath,
     getEntry,
     getHtml,
-    getEntryAndPage
+    getEntryAndPage,
+    writeSchemaJS
 }

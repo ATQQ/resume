@@ -2,13 +2,17 @@
 
 const path = require('path');
 const webpack = require('webpack')
-const { getEntryAndPage, getHtml } = require('./fileUtil')
+const { getEntryAndPage, getHtml, writeSchemaJS } = require('./fileUtil')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 //清理打包
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { entry, pages } = getEntryAndPage('src/pages')
+
+// 生成 schema.js 文件 
+writeSchemaJS()
+
 module.exports = {
     entry: {
         ...entry,

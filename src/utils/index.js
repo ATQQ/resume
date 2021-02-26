@@ -17,6 +17,11 @@ export function getSchema(key = '') {
         setSchema(getDefaultSchema(key), key)
         return getSchema()
     }
+    // 如果默认是空对象的则再取一次默认值
+    if (data === '{}') {
+        setSchema(getDefaultSchema(key), key)
+        data = localStorage.getItem(key)
+    }
     return JSON.parse(data)
 }
 
