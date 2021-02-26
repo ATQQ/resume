@@ -1,7 +1,7 @@
 @import './../../assets/css/base.scss';
+html,
+body,
 #resume {
-  margin: 0 auto;
-  padding: 0;
-  width: $width;
-  height: $height;
+  height: 100%;
+  overflow: hidden;
 }

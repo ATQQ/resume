@@ -5,6 +5,9 @@
 header{
     display: none !important;
 }
+.main{
+  padding: 0 !important;
+}
 #page{
     border: none !important;
     margin:0 !important;
