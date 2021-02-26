@@ -1,10 +1,23 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { getSchema } from '../../utils'
 
 export default function App() {
-    const msg = '我是React编写的页面'
+    const [data, setJSON] = useState(getSchema())
+    useEffect(() => {
+        window.refresh = () => {
+            setJSON(getSchema())
+        }
+    }, [])
+    const { name, position, dataString } = data
     return (
         <div>
-            <h1>{msg}</h1>
+            <h1>{name}</h1>
+            <h2>{position}</h2>
+            {
+                dataString.map((v, i) => {
+                    return <h2 key={i}>{v}</h2>
+                })
+            }
         </div>
     )
 }
