@@ -21,6 +21,10 @@ function init() {
         return link
     })
 
+    // 将使用文档放在最后
+    const _i = links.findIndex(link => link.text === '使用文档')
+    links.push(...links.splice(_i, 1))
+
     // 插入自定义的链接
     links.push(createLink('Github', 'https://github.com/ATQQ/resume', true))
     links.push(createLink('如何书写一份好的互联网校招简历', 'https://juejin.cn/post/6928390537946857479', true))
@@ -34,7 +38,7 @@ function init() {
     $nav.append(t)
 
     // 默认页面
-    changeIframePage(links[0].href)
+    changeIframePage(links[2].href)
 
     // 导航栏
     document.getElementById('open-menu').addEventListener('click', function () {
@@ -89,7 +93,10 @@ function init() {
             document.getElementById('tipsNum').textContent = editor.searchBox.results.length
             for (const r of editor.searchBox.results) {
                 if (r.node.value === clickText) {
-                    $textarea.focus()
+                    $textarea.style.boxShadow = '0 0 1rem yellow'
+                    setTimeout(() => {
+                        $textarea.style.boxShadow = ''
+                    }, 200)
                     return
                 }
                 editor.searchBox.dom.input.querySelector('.jsoneditor-next').dispatchEvent(new Event('click'))
@@ -127,35 +134,37 @@ function init() {
 
         // 图片转base64
         const $imgs = document.getElementById('page').contentDocument.body.querySelectorAll('img')
+        if ($imgs.length > 0) {
+            await new Promise((res) => {
+                let _i = 0
+                for (const $img of $imgs) {
+                    if (!$img.src.startsWith('http')) {
+                        _i++;
+                        if (_i === $imgs.length) {
+                            res()
+                        }
+                        return
+                    }
+                    var image = new Image();
+                    image.src = $img.src + '?v=' + Math.random(); // 处理缓存
+                    image.crossOrigin = "*";  // 支持跨域图片
+                    image.onload = function () {
+                        _i += 1
+                        $img.src = getBase64Image(image)
+                        if (_i === $imgs.length) {
+                            res()
+                        }
+                    }
+                    image.onerror = function () {
+                        _i += 1
+                        if (_i === $imgs.length) {
+                            res()
+                        }
+                    }
+                }
+            })
+        }
 
-        await new Promise((res) => {
-            let _i = 0
-            for (const $img of $imgs) {
-                if (!$img.src.startsWith('http')) {
-                    _i++;
-                    if (_i === $imgs.length) {
-                        res()
-                    }
-                    return
-                }
-                var image = new Image();
-                image.src = $img.src + '?v=' + Math.random(); // 处理缓存
-                image.crossOrigin = "*";  // 支持跨域图片
-                image.onload = function () {
-                    _i += 1
-                    $img.src = getBase64Image(image)
-                    if (_i === $imgs.length) {
-                        res()
-                    }
-                }
-                image.onerror = function () {
-                    _i += 1
-                    if (_i === $imgs.length) {
-                        res()
-                    }
-                }
-            }
-        })
 
         // 导出pdf
         html2canvas(document.getElementById('page').contentDocument.body).then(canvas => {

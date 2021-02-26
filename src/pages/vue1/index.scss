@@ -1,0 +1,92 @@
+@import './../../assets/css/base.scss';
+html,
+body,
+#resume {
+  height: 100%;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+
+$themeColor: #a79d91;
+
+header {
+  text-align: center;
+  h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    &::before,
+    &::after {
+      content: '';
+      display: block;
+      height: 0.2rem;
+      background-color: $themeColor;
+      width: 20%;
+    }
+
+    &::before {
+      margin-right: 4rem;
+    }
+    &::after {
+      margin-left: 4rem;
+    }
+  }
+  h2 {
+    font-weight: lighter;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .infos {
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    margin-top: 1rem;
+    i {
+      border-radius: 50%;
+      padding: 0.3rem;
+      color: #fff;
+      font-weight: bold;
+      background-color: $themeColor;
+      margin-right: 0.5rem;
+    }
+    span {
+      color: $themeColor;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+div .exps {
+  list-style: none;
+  margin-top: 1rem;
+  li {
+    border-top: 0.3rem solid $themeColor;
+    padding: 0.5rem;
+    h3 {
+      color: $themeColor;
+      font-weight: bold;
+      font-size: 1.5rem;
+      padding: 0.5rem 0;
+    }
+    p {
+      font-size: 0.8rem;
+    }
+    .des {
+      margin-top: 0.5rem;
+      display: flex;
+      span {
+        min-width: 20%;
+        margin-right: 2rem;
+      }
+      .time {
+        color: $themeColor;
+        min-width: 15%;
+      }
+    }
+    .introduce {
+      margin-top: 0.5rem;
+    }
+  }
+}
