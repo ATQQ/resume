@@ -38,7 +38,7 @@ function init() {
     $nav.append(t)
 
     // 默认页面
-    changeIframePage(links[2].href)
+    changeIframePage(links[1].href)
 
     // 导航栏
     document.getElementById('open-menu').addEventListener('click', function () {
