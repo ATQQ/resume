@@ -149,6 +149,10 @@ function init() {
 
             // 更新到textarea中的内容
             $textarea.value = clickText
+            // 聚焦
+            if (document.getElementById('focus').checked) {
+                $textarea.focus()
+            }
             // 记录点击的dom
             $textarea.clickDom = e.target
             let i = -1
