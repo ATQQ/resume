@@ -19,7 +19,7 @@ module.exports = {
         'app': path.resolve(__dirname, '../src/app.js')
     },
     output: {
-        filename: 'js/[name]-[hash].js',
+        filename: 'js/[name]-[contenthash:8].js',
         path: path.resolve(__dirname, './../dist')
     },
     resolve: {
@@ -70,16 +70,13 @@ module.exports = {
         //css分离(输出文件名))
         new MiniCssExtractPlugin({
             // 类似 webpackOptions.output里面的配置 可以忽略
-            filename: 'css/[name]-[hash].css',
-            chunkFilename: 'css/[id]-[hash].css',
+            filename: 'css/[name]-[contenthash:8].css',
+            chunkFilename: 'css/[id]-[contenthash:8].css',
         }),
         new webpack.HotModuleReplacementPlugin(),
         new CopyWebpackPlugin({
             patterns: [
                 { from: 'public' },
-                { from: 'node_modules/jsoneditor/dist/jsoneditor.min.css', to: 'css' },
-                { from: 'node_modules/jsoneditor/dist/jsoneditor.min.js', to: 'js' },
-                { from: 'node_modules/jsoneditor/dist/img', to: 'css/img' },
             ]
         }),
         new VueLoaderPlugin()
