@@ -7,13 +7,15 @@ header{
 }
 .main{
   padding: 0 !important;
+  margin: 0 !important;
 }
 #page{
     border: none !important;
     margin:0 !important;
+    padding: 0 !important;
     transform: scale(1) !important;
 }
-.left,.right{
+.right{
     display: none !important;
 }
 
