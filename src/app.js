@@ -87,12 +87,27 @@ function initNav(defaultPage = 'react1') {
     })
 }
 /**
+ * 激活重置按钮
+ */
+function registerResetBtn() {
+    // 重置
+    document.getElementById('reset').addEventListener('click', function () {
+        if (confirm('是否初始化数据，这将会覆盖原有数据')) {
+            const key = getPageKey()
+            const data = getDefaultSchema(key)
+            setSchema(data, key)
+            editor.set(data)
+            refreshIframePage(true)
+            document.getElementById('domContext').value = ''
+        }
+    })
+}
+/**
  * 初始化
  */
 function init() {
-    // 初始化导航栏
     initNav()
-
+    registerResetBtn()
     const $textarea = document.getElementById('domContext')
     $textarea.addEventListener('input', debounce(function () {
         if (!editor.searchBox?.activeResult?.node) {
@@ -155,17 +170,7 @@ function init() {
         })
     }
 
-    // 重置
-    document.getElementById('reset').addEventListener('click', function () {
-        if (confirm('是否初始化数据，这将会覆盖原有数据')) {
-            const key = getPageKey()
-            const data = getDefaultSchema(key)
-            setSchema(data, key)
-            editor.set(data)
-            refreshIframePage()
-            $textarea.value = ''
-        }
-    })
+
     // 显隐
     document.getElementById('toggle').addEventListener('click', function () {
         const $editor = document.getElementById('jsonEditor')
@@ -275,8 +280,12 @@ function changeIframePage(src) {
     }
 }
 
-function refreshIframePage() {
+function refreshIframePage(isReload = false) {
     const page = document.getElementById('page')
+    if (isReload) {
+        page.contentWindow.location.reload()
+        return
+    }
     if (page.contentWindow.refresh) {
         page.contentWindow.refresh()
         return

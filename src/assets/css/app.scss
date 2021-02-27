@@ -15,6 +15,8 @@
   }
   #jsonEditor {
     max-width: calc(100vw - 900px);
+    position: sticky;
+    top: 9rem;
   }
 }
 
@@ -117,6 +119,10 @@ header {
   margin-top: 0.5rem;
   padding: 1rem;
   box-sizing: border-box;
+  position: sticky;
+  top: 3rem;
+  z-index: 1;
+  resize: none;
   &:focus {
     box-shadow: 0 0 20px yellow;
     border: none;
