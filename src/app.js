@@ -8,11 +8,10 @@ const { jsPDF } = window.jspdf;
 // json编辑器
 const editor = initEditor('jsonEditor')
 
-
 /**
- * 初始化
+ * 初始化导航栏
  */
-function init() {
+function initNav(defaultPage = 'react1') {
     const $nav = document.querySelector('header nav')
     // 获取所有模板的链接
     const links = $nav.innerText.split(',').map(pageName => {
@@ -25,11 +24,11 @@ function init() {
     const _i = links.findIndex(link => link.text === '使用文档')
     links.push(...links.splice(_i, 1))
 
-    // 插入自定义的链接
+    // 加入自定义的链接
     links.push(createLink('Github', 'https://github.com/ATQQ/resume', true))
     links.push(createLink('如何书写一份好的互联网校招简历', 'https://juejin.cn/post/6928390537946857479', true))
 
-    // 插入所有模板的链接
+    // 渲染到页面中
     const t = document.createDocumentFragment()
     links.forEach(link => {
         t.appendChild(link)
@@ -38,9 +37,9 @@ function init() {
     $nav.append(t)
 
     // 默认页面
-    changeIframePage(links[1].href)
+    changeIframePage(links.find(link => link.href.endsWith(defaultPage)).href)
 
-    // 导航栏
+    // 窄屏手动开/关导航栏
     document.getElementById('open-menu').addEventListener('click', function () {
         if (!$nav.style.display) {
             $nav.style.display = 'block'
@@ -52,57 +51,108 @@ function init() {
             $nav.style.display = 'block'
         }
     })
-    // 刷新iframe中的链接
+
+    // 切换Page
     $nav.addEventListener('click', function (e) {
+        // TODO：待优化窄屏幕逻辑
         if (e.target.tagName.toLowerCase() === 'a') {
             if ($nav.style.display) {
                 $nav.style.display = 'none'
             }
         }
+
+        // 新窗口打开
         if (e.target?.target !== 'page') {
             return
         }
+
+        // iframe中打开
         if (e.target.tagName.toLowerCase() === 'a') {
             e.preventDefault()
-            // 存取数据，href为key
-            const a = e.target
-            changeIframePage(a.href)
+            changeIframePage(e.target.href)
         }
     })
+
+    // 适配屏幕
+    window.addEventListener('resize', debounce((e) => {
+        // TODO:导航栏 后续优化
+        const width = e.currentTarget.innerWidth
+        if (width > 900) {
+            $nav.style.display = ''
+        }
+        scalePage(width)
+    }, 500))
+    window.addEventListener('load', (e) => {
+        scalePage(e.currentTarget.innerWidth)
+    })
+}
+/**
+ * 初始化
+ */
+function init() {
+    // 初始化导航栏
+    initNav()
 
     const $textarea = document.getElementById('domContext')
     $textarea.addEventListener('input', debounce(function () {
         if (!editor.searchBox?.activeResult?.node) {
             return
         }
+        initObserver()
+        // 更新点击dom
+        $textarea.clickDom.textContent = this.value
+
+        // 更新editor
         editor.searchBox.activeResult.node.value = this.value
         editor.refresh()
-        updatePage(editor.get())
+
+        // 更新到本地
+        setSchema(editor.get(), getPageKey())
     }, 100))
+
     document.getElementById('page').onload = function (e) {
         // 其余逻辑
         editor.set(getSchema(getPageKey()))
 
         // 获取点击到的内容
         document.getElementById('page').contentDocument.body.addEventListener('click', function (e) {
-            const clickText = e.target.textContent.trim()
+            const $target = e.target
+            const clickText = $target.textContent.trim()
+            const matchDoms = traverseDomTreeMatchStr(document.getElementById('page').contentDocument.body, clickText)
+            const mathIndex = matchDoms.findIndex(v => v === $target)
+
+            if (mathIndex < 0) {
+                return
+            }
+            // 解除上次点击的
+            highLightDom($textarea.clickDom, 0)
+            // 高亮这次的10s
+            highLightDom($target, 10000)
+            // 更新editor中的search内容
             editor.searchBox.dom.search.value = clickText
-            // 更新到textarea
-            $textarea.value = clickText
             editor.searchBox.dom.search.dispatchEvent(new Event('change'))
-            document.getElementById('tipsNum').textContent = editor.searchBox.results.length
+
+            // 更新到textarea中的内容
+            $textarea.value = clickText
+            // 记录点击的dom
+            $textarea.clickDom = e.target
+            let i = -1
             for (const r of editor.searchBox.results) {
                 if (r.node.value === clickText) {
-                    $textarea.style.boxShadow = '0 0 1rem yellow'
-                    setTimeout(() => {
-                        $textarea.style.boxShadow = ''
-                    }, 200)
-                    return
+                    i++
+                    // 匹配到json中的节点
+                    if (i === mathIndex) {
+                        // 高亮一下$textarea
+                        $textarea.style.boxShadow = '0 0 1rem yellow'
+                        setTimeout(() => {
+                            $textarea.style.boxShadow = ''
+                        }, 200)
+                        return
+                    }
                 }
                 editor.searchBox.dom.input.querySelector('.jsoneditor-next').dispatchEvent(new Event('click'))
             }
         })
-
     }
 
     // 重置
@@ -127,10 +177,14 @@ function init() {
     })
     // 打印 - 导出pdf
     document.getElementById('print').addEventListener('click', function () {
+        // 解除高亮
+        highLightDom($textarea.clickDom, 0)
         window.print()
     })
     // jsPDF - 导出pdf
     document.getElementById('pdf').addEventListener('click', async function () {
+        // 解除高亮
+        highLightDom($textarea.clickDom, 0)
 
         // 图片转base64
         const $imgs = document.getElementById('page').contentDocument.body.querySelectorAll('img')
@@ -177,19 +231,6 @@ function init() {
             doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 841.89);
             doc.save(`${Date.now()}.pdf`);
         });
-    })
-
-    // 适配屏幕
-    window.addEventListener('resize', debounce((e) => {
-        // 导航栏 后续优化
-        const width = e.currentTarget.innerWidth
-        if (width > 900) {
-            $nav.style.display = ''
-        }
-        scalePage(width)
-    }, 500))
-    window.addEventListener('load', (e) => {
-        scalePage(e.currentTarget.innerWidth)
     })
 
 }
@@ -243,17 +284,17 @@ function refreshIframePage() {
     page.contentWindow.location.reload()
 }
 
-
 function updatePage(data) {
-    const observer = initObserver()
+    initObserver()
     setSchema(data, getPageKey())
     refreshIframePage()
     // 因为mutationObserver是宏任务所以这里设为0
-    setTimeout(() => {
-        observer.disconnect()
-    }, 0)
 }
 
+/**
+ * 初始化JSON编辑器
+ * @param {string} id 
+ */
 function initEditor(id) {
     let timer = null
     const editor = new JSONEditor(document.getElementById(id), {
@@ -267,6 +308,9 @@ function initEditor(id) {
     return editor
 }
 
+/**
+ * 高亮变化的Dom
+ */
 function initObserver() {
     const config = { childList: true, subtree: true, characterData: true };
     const observer = new MutationObserver(debounce(function (mutationsList, observer) {
@@ -275,15 +319,38 @@ function initObserver() {
             if (e.type === 'characterData') {
                 target = e.target.parentElement
             }
-            target.style.backgroundColor = '#fff566'
-            setTimeout(() => {
-                target.style.backgroundColor = ''
-            }, 500)
+            highLightDom(target)
         }
     }, 100))
 
     observer.observe(document.getElementById('page').contentDocument.body, config);
-    return observer
+    setTimeout(() => {
+        observer.disconnect()
+    }, 0)
+}
+
+function traverseDomTreeMatchStr(dom, str, res = []) {
+    if (dom && dom.children && dom.children.length > 0) {
+        for (const d of dom.children) {
+            traverseDomTreeMatchStr(d, str, res)
+        }
+    } else if (dom?.textContent?.trim() === str) {
+        res.push(dom)
+    }
+
+    return res
+}
+
+function highLightDom(dom, time = 500, color = '#fff566') {
+    if (!dom?.style) return
+    if (time === 0) {
+        dom.style.backgroundColor = ''
+        return
+    }
+    dom.style.backgroundColor = '#fff566'
+    setTimeout(() => {
+        dom.style.backgroundColor = ''
+    }, time)
 }
 
 init()
