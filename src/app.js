@@ -26,7 +26,9 @@ function initNav(defaultPage = 'react1') {
 
     // 加入自定义的链接
     links.push(createLink('Github', 'https://github.com/ATQQ/resume', true))
+    links.push(createLink('贡献模板', 'https://github.com/ATQQ/resume/blob/main/README.md', true))
     links.push(createLink('如何书写一份好的互联网校招简历', 'https://juejin.cn/post/6928390537946857479', true))
+    links.push(createLink('建议/反馈', 'https://www.wenjuan.com/s/MBryA3gI/', true))
 
     // 渲染到页面中
     const t = document.createDocumentFragment()
@@ -37,7 +39,9 @@ function initNav(defaultPage = 'react1') {
     $nav.append(t)
 
     // 默认页面
-    changeIframePage(links.find(link => link.href.endsWith(defaultPage)).href)
+    const _link = links.find(link => link.href.endsWith(defaultPage))
+    changeIframePage(_link.href)
+    activeLink(_link)
 
     // 窄屏手动开/关导航栏
     document.getElementById('open-menu').addEventListener('click', function () {
@@ -70,6 +74,7 @@ function initNav(defaultPage = 'react1') {
         if (e.target.tagName.toLowerCase() === 'a') {
             e.preventDefault()
             changeIframePage(e.target.href)
+            activeLink(e.target)
         }
     })
 
@@ -108,6 +113,9 @@ function registerResetBtn() {
 function init() {
     initNav()
     registerResetBtn()
+    // hide control panel
+    document.getElementsByClassName('right')[0].toggleAttribute('hidden')
+
     const $textarea = document.getElementById('domContext')
     $textarea.addEventListener('input', debounce(function () {
         if (!editor.searchBox?.activeResult?.node) {
@@ -126,6 +134,9 @@ function init() {
     }, 100))
 
     document.getElementById('page').onload = function (e) {
+        // show control panel
+        document.getElementsByClassName('right')[0].removeAttribute('hidden')
+
         // 其余逻辑
         editor.set(getSchema(getPageKey()))
 
@@ -275,6 +286,14 @@ function scalePage(width) {
 
 function getPageKey() {
     return document.getElementById('page').contentWindow.location.pathname.replace(/\/$/, '')
+}
+
+function activeLink(link) {
+    Array.from(link.parentElement.children).forEach(el => {
+        el.classList.remove('active')
+    })
+    link.classList.remove('active')
+    link.classList.add('active')
 }
 
 function changeIframePage(src) {
