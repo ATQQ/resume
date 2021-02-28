@@ -1,0 +1,31 @@
+@import './../../assets/css/base.scss';
+html,
+body,
+#resume {
+  height: 100%;
+  overflow: hidden;
+}
+// 上面部分是推荐引入的通用样式
+
+// 下面书写我们的样式
+$themeColor: red;
+
+#app {
+  padding: 1rem;
+}
+
+header {
+  h1 {
+    color: $themeColor;
+  }
+  h2 {
+    font-weight: lighter;
+  }
+}
+
+.infos {
+  list-style: none;
+  li {
+    color: $themeColor;
+  }
+}
