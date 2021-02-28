@@ -136,3 +136,18 @@ header {
     border: none;
   }
 }
+
+@media screen and (max-width: 1200px) {
+  #domContext {
+    padding: 0.2rem;
+    &:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3rem;
+      padding: 0.1rem 0.5rem;
+      resize: vertical;
+    }
+  }
+}

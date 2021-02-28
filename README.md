@@ -45,9 +45,9 @@ npm run build
 ├── assets          静态资源css/img
 ├── constants       常量
 │   ├── index.js    存放路径与中文title的映射
-│   └── schema      存放每个简历模板的默认JSON数据,与pages中的模板一一对应
-│   └────── demo1.js  
-│   └────── react1.js  
+│   ├── schema      存放每个简历模板的默认JSON数据,与pages中的模板一一对应
+│   ├────── demo1.js  
+│   ├────── react1.js  
 │   └────── vue1.js   
 ├── pages           简历模板
 │   ├── demo1           - 原生js编写的简历
@@ -465,6 +465,6 @@ export const navTitle = {
 
 ## 已有模板展示
 
-<img src="https://img.cdn.sugarat.top/mdImg/MTYxMzMwMzg4MDcyMQ==613303880721" width="30%"/>
-<img src="https://img.cdn.sugarat.top/mdImg/MTYxNDQ5MDQ1NzczOQ==614490457739" width="30%"/>
-<img src="https://img.cdn.sugarat.top/mdImg/MTYxNDQ5MDU1MDIzMw==614490550233" width="30%"/>
+<img src="https://img.cdn.sugarat.top/mdImg/MTYxMzMwMzg4MDcyMQ==613303880721"/>
+<img src="https://img.cdn.sugarat.top/mdImg/MTYxNDQ5MDQ1NzczOQ==614490457739"/>
+<img src="https://img.cdn.sugarat.top/mdImg/MTYxNDQ5MDU1MDIzMw==614490550233"/>
