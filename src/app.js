@@ -1,12 +1,13 @@
 import './assets/css/app.scss'
-import { createLink, getDefaultSchema, getSchema, setSchema, debounce } from './utils'
+import { createLink, getDefaultSchema, getSchema, setSchema, debounce, copyRes, downloadTxtFile } from './utils'
 import { navTitle } from './constants'
 import html2canvas from 'html2canvas'
+import { toast } from './components/Toast';
 
 window.html2canvas = html2canvas;
 const { jsPDF } = window.jspdf;
 // json编辑器
-const editor = initEditor('jsonEditor')
+let editor = initEditor('jsonEditor')
 
 /**
  * 初始化导航栏
@@ -146,7 +147,9 @@ function init() {
             const clickText = $target.textContent.trim()
             const matchDoms = traverseDomTreeMatchStr(document.getElementById('page').contentDocument.body, clickText)
             const mathIndex = matchDoms.findIndex(v => v === $target)
-
+            if (editor.mode === 'code') {
+                changeEditorMode('tree')
+            }
             if (mathIndex < 0) {
                 return
             }
@@ -186,14 +189,13 @@ function init() {
     }
 
 
-    // 显隐
-    document.getElementById('toggle').addEventListener('click', function () {
-        const $editor = document.getElementById('jsonEditor')
-        if ($editor.getAttribute('hidden')) {
-            $editor.removeAttribute('hidden')
-        } else {
-            $editor.setAttribute('hidden', 'hidden')
+    // 切换模式
+    document.getElementById('toggle').addEventListener('click', function (e) {
+        if (editor.mode === 'tree') {
+            changeEditorMode('code')
+            return
         }
+        changeEditorMode('tree')
     })
     // 打印 - 导出pdf
     document.getElementById('print').addEventListener('click', function () {
@@ -253,6 +255,21 @@ function init() {
         });
     })
 
+    registerJSONBtn()
+}
+
+function registerJSONBtn() {
+    document.querySelector('.json-btns').addEventListener('click', function (e) {
+        switch (e.target.dataset.type) {
+            case 'copy':
+                copyRes(JSON.stringify(editor.get()))
+                break;
+            case 'download':
+                toast.success('开始下载')
+                downloadTxtFile(JSON.stringify(editor.get()), `${Date.now()}.json`)
+                break;
+        }
+    })
 }
 
 function getBase64Image(img) {
@@ -261,7 +278,7 @@ function getBase64Image(img) {
     canvas.height = img.height;
     var ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, img.width, img.height);
-    var dataURL = canvas.toDataURL("image/png");  // 可选其他值 image/jpeg
+    var dataURL = canvas.toDataURL("image/png");
     return dataURL;
 }
 
@@ -320,26 +337,45 @@ function updatePage(data) {
     initObserver()
     setSchema(data, getPageKey())
     refreshIframePage()
-    // 因为mutationObserver是宏任务所以这里设为0
 }
 
 /**
  * 初始化JSON编辑器
  * @param {string} id 
  */
-function initEditor(id) {
+function initEditor(id, mode = 'tree') {
     let timer = null
     const editor = new JSONEditor(document.getElementById(id), {
-        onChangeJSON(data) {
+        // onChangeJSON(data) {
+        //     if (timer) {
+        //         clearTimeout(timer)
+        //     }
+        //     setTimeout(updatePage, 200, data)
+        // },
+        onChange() {
             if (timer) {
                 clearTimeout(timer)
             }
-            setTimeout(updatePage, 200, data)
-        }
+            setTimeout(updatePage, 200, editor.get())
+        },
+        mode
     })
+    editor.mode = mode
     return editor
 }
 
+function changeEditorMode(mode) {
+    if (mode === 'tree') {
+        document.getElementById('toggle').textContent = '切换为编辑模式'
+        document.getElementById('jsonEditor').style.height = ''
+    } else {
+        document.getElementById('toggle').textContent = '切换为树形模式'
+        document.getElementById('jsonEditor').style.height = '50vh'
+    }
+    editor.destroy()
+    editor = initEditor('jsonEditor', mode)
+    editor.set(getSchema(getPageKey()))
+}
 /**
  * 高亮变化的Dom
  */
@@ -361,8 +397,11 @@ function initObserver() {
     }, 0)
 }
 
+/**
+ * 遍历目标Dom树，找出文本内容与目标一致的dom组
+ */
 function traverseDomTreeMatchStr(dom, str, res = []) {
-    if (dom && dom.children && dom.children.length > 0) {
+    if (dom?.children?.length > 0) {
         for (const d of dom.children) {
             traverseDomTreeMatchStr(d, str, res)
         }

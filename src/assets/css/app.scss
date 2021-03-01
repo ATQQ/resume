@@ -12,6 +12,9 @@
   padding: 0.5rem;
   .right {
     margin: 0 1rem;
+    .tips {
+      font-size: 0.8rem;
+    }
   }
   #jsonEditor {
     width: calc(100vw - 900px);
