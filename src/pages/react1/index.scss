@@ -71,18 +71,28 @@ header {
     font-size: 1.5rem;
     font-weight: normal;
     padding-left: 0.5rem;
-    border-bottom: 2px solid $themeColor;
     position: relative;
+    padding-bottom: 0.1rem;
     &::before {
       content: '';
       position: absolute;
-      bottom: -0.35rem;
+      transform: translateY(50%);
       left: 0;
+      bottom: 0;
       display: block;
       width: 0.5rem;
       height: 0.5rem;
       border-radius: 50%;
       background-color: $themeColor;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      border-bottom: 2px solid
+        $themeColor;
     }
   }
   p.des {

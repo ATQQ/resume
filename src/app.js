@@ -1,34 +1,58 @@
 import './assets/css/app.scss'
-import { createLink, getDefaultSchema, getSchema, setSchema, debounce, copyRes, downloadTxtFile } from './utils'
+import { createLink, getDefaultSchema, getSchema, setSchema, debounce, copyRes, downloadTxtFile, getBase64Image, traverseDomTreeMatchStr, highLightDom, getPathnameKey, createEmptySpan, Dom2PDF } from './utils'
 import { navTitle } from './constants'
-import html2canvas from 'html2canvas'
 import { toast } from './components/Toast';
+import html2canvas from 'html2canvas'
 
 window.html2canvas = html2canvas;
-const { jsPDF } = window.jspdf;
+
 // json编辑器
 let editor = initEditor('jsonEditor')
 
+init()
+
+/**
+ * 初始化
+ */
+function init() {
+    toggleControlPanel()
+    initNav()
+
+    registerTextAreaInput()
+    registerIframePageLoad()
+    // 注册按钮上的事件
+    registerResetBtn()
+    registerJSONBtn()
+    registerToggle()
+    registerPCPrint()
+    registerJSPDF()
+}
 /**
  * 初始化导航栏
  */
-function initNav(defaultPage = 'react1') {
+function initNav(defaultPage = getActivePageKey() || 'react1') {
     const $nav = document.querySelector('header nav')
+
+    // 优先根据别名顺序生成
+    const titleKeys = Object.keys(navTitle).concat($nav.innerText.split(',')).reduce((pre, now) => {
+        if (!pre.includes(now)) {
+            pre.push(now)
+        }
+        return pre
+    }, [])
     // 获取所有模板的链接
-    const links = $nav.innerText.split(',').map(pageName => {
-        const link = createLink(navTitle[pageName] || pageName, `./pages/${pageName}`)
+    const links = titleKeys.map(titleKey => {
+        const link = createLink(navTitle[titleKey] || titleKey, `./pages/${titleKey}`)
         // iframe中打开
         return link
     })
 
-    // 将使用文档放在最后
-    const _i = links.findIndex(link => link.text === '使用文档')
-    links.push(...links.splice(_i, 1))
-
     // 加入自定义的链接
+    links.push(createEmptySpan())
     links.push(createLink('Github', 'https://github.com/ATQQ/resume', true))
     links.push(createLink('贡献模板', 'https://github.com/ATQQ/resume/blob/main/README.md', true))
     links.push(createLink('如何书写一份好的互联网校招简历', 'https://juejin.cn/post/6928390537946857479', true))
+    links.push(createLink('实现原理', 'https://juejin.cn/post/6934595007370231822', true))
     links.push(createLink('建议/反馈', 'https://www.wenjuan.com/s/MBryA3gI/', true))
 
     // 渲染到页面中
@@ -40,7 +64,7 @@ function initNav(defaultPage = 'react1') {
     $nav.append(t)
 
     // 默认页面
-    const _link = links.find(link => link.href.endsWith(defaultPage))
+    const _link = links.find(link => link?.href?.endsWith(defaultPage))
     changeIframePage(_link.href)
     activeLink(_link)
 
@@ -92,57 +116,16 @@ function initNav(defaultPage = 'react1') {
         scalePage(e.currentTarget.innerWidth)
     })
 }
-/**
- * 激活重置按钮
- */
-function registerResetBtn() {
-    // 重置
-    document.getElementById('reset').addEventListener('click', function () {
-        if (confirm('是否初始化数据，这将会覆盖原有数据')) {
-            const key = getPageKey()
-            const data = getDefaultSchema(key)
-            setSchema(data, key)
-            editor.set(data)
-            refreshIframePage(true)
-            document.getElementById('domContext').value = ''
-        }
-    })
-}
-/**
- * 初始化
- */
-function init() {
-    initNav()
-    registerResetBtn()
-    // hide control panel
-    document.getElementsByClassName('right')[0].toggleAttribute('hidden')
-
-    const $textarea = document.getElementById('domContext')
-    $textarea.addEventListener('input', debounce(function () {
-        if (!editor.searchBox?.activeResult?.node) {
-            return
-        }
-        initObserver()
-        // 更新点击dom
-        $textarea.clickDom.textContent = this.value
-
-        // 更新editor
-        editor.searchBox.activeResult.node.value = this.value
-        editor.refresh()
-
-        // 更新到本地
-        setSchema(editor.get(), getPageKey())
-    }, 100))
-
+function registerIframePageLoad() {
     document.getElementById('page').onload = function (e) {
         // show control panel
-        document.getElementsByClassName('right')[0].removeAttribute('hidden')
+        toggleControlPanel(false)
 
-        // 其余逻辑
+        // 初始化json编辑器内容
         editor.set(getSchema(getPageKey()))
 
         // 获取点击到的内容
-        document.getElementById('page').contentDocument.body.addEventListener('click', function (e) {
+        e.path[0].contentDocument.body.addEventListener('click', function (e) {
             const $target = e.target
             const clickText = $target.textContent.trim()
             const matchDoms = traverseDomTreeMatchStr(document.getElementById('page').contentDocument.body, clickText)
@@ -154,6 +137,8 @@ function init() {
                 return
             }
             // 解除上次点击的
+            // TODO: 优化
+            const $textarea = document.getElementById('domContext')
             highLightDom($textarea.clickDom, 0)
             // 高亮这次的10s
             highLightDom($target, 10000)
@@ -186,9 +171,31 @@ function init() {
                 editor.searchBox.dom.input.querySelector('.jsoneditor-next').dispatchEvent(new Event('click'))
             }
         })
+
+        storageActivePagePath()
     }
+}
 
+function registerTextAreaInput() {
+    const $textarea = document.getElementById('domContext')
+    $textarea.addEventListener('input', debounce(function () {
+        if (!editor.searchBox?.activeResult?.node) {
+            return
+        }
+        initObserver()
+        // 更新点击dom
+        $textarea.clickDom.textContent = this.value
 
+        // 更新editor
+        editor.searchBox.activeResult.node.value = this.value
+        editor.refresh()
+
+        // 更新到本地
+        setSchema(editor.get(), getPageKey())
+    }, 100))
+}
+
+function registerToggle() {
     // 切换模式
     document.getElementById('toggle').addEventListener('click', function (e) {
         if (editor.mode === 'tree') {
@@ -197,67 +204,60 @@ function init() {
         }
         changeEditorMode('tree')
     })
+}
+
+function registerPCPrint() {
     // 打印 - 导出pdf
     document.getElementById('print').addEventListener('click', function () {
         // 解除高亮
-        highLightDom($textarea.clickDom, 0)
-        window.print()
-    })
-    // jsPDF - 导出pdf
-    document.getElementById('pdf').addEventListener('click', async function () {
-        // 解除高亮
-        highLightDom($textarea.clickDom, 0)
+        highLightDom(document.getElementById('domContext').clickDom, 0)
 
-        // 图片转base64
-        const $imgs = document.getElementById('page').contentDocument.body.querySelectorAll('img')
-        if ($imgs.length > 0) {
-            await new Promise((res) => {
-                let _i = 0
-                for (const $img of $imgs) {
-                    if (!$img.src.startsWith('http')) {
-                        _i++;
-                        if (_i === $imgs.length) {
-                            res()
-                        }
-                        return
-                    }
-                    var image = new Image();
-                    image.src = $img.src + '?v=' + Math.random(); // 处理缓存
-                    image.crossOrigin = "*";  // 支持跨域图片
-                    image.onload = function () {
-                        _i += 1
-                        $img.src = getBase64Image(image)
-                        if (_i === $imgs.length) {
-                            res()
-                        }
-                    }
-                    image.onerror = function () {
-                        _i += 1
-                        if (_i === $imgs.length) {
-                            res()
-                        }
-                    }
-                }
-            })
+        if (window.print) {
+            window.print()
+            return
         }
-
-
-        // 导出pdf
-        html2canvas(document.getElementById('page').contentDocument.body).then(canvas => {
-            //返回图片dataURL，参数：图片格式和清晰度(0-1)
-            var pageData = canvas.toDataURL('image/jpeg', 1.0);
-            //方向默认竖直，尺寸ponits，格式a4[595.28,841.89]
-            var doc = new jsPDF('', 'pt', 'a4');
-            //addImage后两个参数控制添加图片的尺寸，此处将页面高度按照a4纸宽高比列进行压缩
-            // doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 592.28 / canvas.width * canvas.height);
-            doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 841.89);
-            doc.save(`${Date.now()}.pdf`);
-        });
+        toast.error('PC上才能使用此按钮')
     })
-
-    registerJSONBtn()
 }
 
+function registerJSPDF() {
+    // jsPDF - 导出pdf
+    document.getElementById('pdf').addEventListener('click', function () {
+        const dom = document.getElementById('page').contentDocument.body
+        if (!dom) return
+        // 解除高亮
+        highLightDom(document.getElementById('domContext').clickDom, 0)
+        Dom2PDF(dom, `${Date.now()}.pdf`)
+    })
+}
+function toggleControlPanel(hide = true) {
+    if (hide) {
+        // hide control panel
+        document.getElementsByClassName('right')[0].setAttribute('hidden', 'hidden')
+        return
+    }
+    // hide control panel
+    document.getElementsByClassName('right')[0].removeAttribute('hidden')
+}
+/**
+ * 激活重置按钮
+ */
+function registerResetBtn() {
+    // 重置
+    document.getElementById('reset').addEventListener('click', function () {
+        if (confirm('是否初始化数据，这将会覆盖原有数据')) {
+            const key = getPageKey()
+            const data = getDefaultSchema(key)
+            setSchema(data, key)
+            editor.set(data)
+            refreshIframePage(true)
+            document.getElementById('domContext').value = ''
+        }
+    })
+}
+/**
+ * 激活JSON下载/复制按钮
+ */
 function registerJSONBtn() {
     document.querySelector('.json-btns').addEventListener('click', function (e) {
         switch (e.target.dataset.type) {
@@ -272,15 +272,6 @@ function registerJSONBtn() {
     })
 }
 
-function getBase64Image(img) {
-    var canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, img.width, img.height);
-    var dataURL = canvas.toDataURL("image/png");
-    return dataURL;
-}
 
 function scalePage(width) {
     if (width < 800) {
@@ -302,7 +293,7 @@ function scalePage(width) {
 
 
 function getPageKey() {
-    return document.getElementById('page').contentWindow.location.pathname.replace(/\/$/, '')
+    return getPathnameKey(document.getElementById('page').contentWindow.location.pathname)
 }
 
 function activeLink(link) {
@@ -311,6 +302,15 @@ function activeLink(link) {
     })
     link.classList.remove('active')
     link.classList.add('active')
+}
+
+function storageActivePagePath() {
+    localStorage.setItem('lastActivePage', getPageKey())
+}
+
+function getActivePageKey() {
+    let activePath = localStorage.getItem('lastActivePage')
+    return activePath?.slice(activePath.lastIndexOf('/') + 1)
 }
 
 function changeIframePage(src) {
@@ -333,6 +333,9 @@ function refreshIframePage(isReload = false) {
     page.contentWindow.location.reload()
 }
 
+/**
+ * 更新子页面
+ */
 function updatePage(data) {
     initObserver()
     setSchema(data, getPageKey())
@@ -340,30 +343,8 @@ function updatePage(data) {
 }
 
 /**
- * 初始化JSON编辑器
- * @param {string} id 
+ * 切换json编辑器的模式
  */
-function initEditor(id, mode = 'tree') {
-    let timer = null
-    const editor = new JSONEditor(document.getElementById(id), {
-        // onChangeJSON(data) {
-        //     if (timer) {
-        //         clearTimeout(timer)
-        //     }
-        //     setTimeout(updatePage, 200, data)
-        // },
-        onChange() {
-            if (timer) {
-                clearTimeout(timer)
-            }
-            setTimeout(updatePage, 200, editor.get())
-        },
-        mode
-    })
-    editor.mode = mode
-    return editor
-}
-
 function changeEditorMode(mode) {
     if (mode === 'tree') {
         document.getElementById('toggle').textContent = '切换为编辑模式'
@@ -398,30 +379,20 @@ function initObserver() {
 }
 
 /**
- * 遍历目标Dom树，找出文本内容与目标一致的dom组
- */
-function traverseDomTreeMatchStr(dom, str, res = []) {
-    if (dom?.children?.length > 0) {
-        for (const d of dom.children) {
-            traverseDomTreeMatchStr(d, str, res)
-        }
-    } else if (dom?.textContent?.trim() === str) {
-        res.push(dom)
-    }
-
-    return res
+* 初始化JSON编辑器
+* @param {string} id 
+*/
+function initEditor(id, mode = 'tree') {
+    let timer = null
+    const editor = new JSONEditor(document.getElementById(id), {
+        onChange() {
+            if (timer) {
+                clearTimeout(timer)
+            }
+            setTimeout(updatePage, 200, editor.get())
+        },
+        mode
+    })
+    editor.mode = mode
+    return editor
 }
-
-function highLightDom(dom, time = 500, color = '#fff566') {
-    if (!dom?.style) return
-    if (time === 0) {
-        dom.style.backgroundColor = ''
-        return
-    }
-    dom.style.backgroundColor = '#fff566'
-    setTimeout(() => {
-        dom.style.backgroundColor = ''
-    }, time)
-}
-
-init()

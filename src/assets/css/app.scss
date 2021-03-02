@@ -88,6 +88,10 @@ header {
       font-weight: bold;
       margin: 0 10px;
     }
+    span {
+      height: 1;
+      border-left: 2px solid #fff;
+    }
     a.active {
       color: #24292e;
       background-color: #fff;
@@ -116,6 +120,13 @@ header {
       left: 0;
       z-index: 1;
       background-color: #24292e;
+      span {
+        width: 80%;
+        display: block;
+        border: 0;
+        margin: 0 auto;
+        border-bottom: 2px solid #fff;
+      }
       a {
         display: block;
         margin: 0.5rem auto;

@@ -3,5 +3,5 @@ export const navTitle = {
     'react1': '模板2',
     'vue1': '模板3',
     'introduce': '使用文档',
-    'abc': '开发示例'
+    'abc': 'demo'
 }
