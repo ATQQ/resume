@@ -1,5 +1,6 @@
+// TODO: 拆分此文件
 import './assets/css/app.scss'
-import { createLink, getDefaultSchema, getSchema, setSchema, debounce, copyRes, downloadTxtFile, getBase64Image, traverseDomTreeMatchStr, highLightDom, getPathnameKey, createEmptySpan, Dom2PDF } from './utils'
+import { createLink, getDefaultSchema, getSchema, setSchema, debounce, copyRes, downloadTxtFile, getBase64Image, traverseDomTreeMatchStr, highLightDom, getPathnameKey, createEmptySpan, Dom2PDF, cloneValue } from './utils'
 import { navTitle } from './constants'
 import { toast } from './components/Toast';
 import html2canvas from 'html2canvas'
@@ -8,6 +9,8 @@ window.html2canvas = html2canvas;
 
 // json编辑器
 let editor = initEditor('jsonEditor')
+// 操作栈
+const dataStack = []
 
 init()
 
@@ -19,7 +22,9 @@ function init() {
     initNav()
 
     registerTextAreaInput()
+    registerInputToolsBtn()
     registerIframePageLoad()
+
     // 注册按钮上的事件
     registerResetBtn()
     registerJSONBtn()
@@ -95,6 +100,14 @@ function initNav(defaultPage = getActivePageKey() || 'react1') {
             return
         }
 
+        if (e.target.href === document.getElementById('page').src) {
+            e.preventDefault()
+            return
+        }
+
+        // 清空历史操作栈
+        dataStack.splice(0, dataStack.length)
+        document.getElementById('domContext').ActiveValues = null
         // iframe中打开
         if (e.target.tagName.toLowerCase() === 'a') {
             e.preventDefault()
@@ -150,6 +163,7 @@ function registerIframePageLoad() {
             $textarea.value = clickText
             // 聚焦
             if (document.getElementById('focus').checked) {
+                // $textarea.removeAttribute('disabled')
                 $textarea.focus()
             }
             // 记录点击的dom
@@ -165,6 +179,7 @@ function registerIframePageLoad() {
                         setTimeout(() => {
                             $textarea.style.boxShadow = ''
                         }, 200)
+                        editor.searchBox.activeResult.node.dom.value.click()
                         return
                     }
                 }
@@ -176,9 +191,241 @@ function registerIframePageLoad() {
     }
 }
 
-function registerTextAreaInput() {
+function activeToolsBtn(dataType) {
+    const $btn = document.querySelector(`button[data-type="${dataType}"]`)
+    $btn.classList.remove('disabled')
+    $btn.removeAttribute('disabled', 'disabled')
+}
+
+function getNowActiveValues() {
+    const json = editor.get()
+    const path = document.getElementById('domContext').valuePath
+    return {
+        json,
+        path
+    }
+}
+
+function resetToolsBtnStatus(disabledAll = false) {
+    // document.querySelectorAll('.tools .left button').forEach(btn => {
+    //     btn.classList.add('disabled')
+    //     btn.setAttribute('disabled', 'disabled')
+    // })
+    if (disabledAll) {
+        return
+    }
+    setTimeout(() => {
+        const $textarea = document.getElementById('domContext')
+        if (!$textarea.clickDom) return
+
+        const { json, path } = getNowActiveValues()
+        // 默认允许 取消,复制内容,清空,回退
+        // activeToolsBtn('cancel')
+        // activeToolsBtn('copy')
+        // activeToolsBtn('clear')
+        // activeToolsBtn('back')
+
+        // 最外层值类型 - 不提供额外操作
+        if (!path || path.length === 1) {
+            return
+        }
+        let data = path.reduce((p, n) => {
+            // 倒序放入对象
+            if (p[0][n] instanceof Object) {
+                p.unshift(p[0][n])
+            } else {
+                // 最后的key做为值插入
+                p.unshift(n)
+            }
+            return p
+        }, [json])
+        $textarea.ActiveValues = data
+        // 启用拷贝
+        // activeToolsBtn('copy-child')
+        // activeToolsBtn('delete')
+    }, 100)
+}
+function registerInputToolsBtn() {
+    // TODO: 优化冗余代码
+    resetToolsBtnStatus(true)
     const $textarea = document.getElementById('domContext')
-    $textarea.addEventListener('input', debounce(function () {
+    document.querySelector('.tools').addEventListener('click', function (e) {
+        if (e.target.tagName.toLowerCase() !== 'button') return
+        toast.success(e.target.textContent.trim())
+        switch (e.target.dataset.type) {
+            case 'copy':
+                copyRes($textarea.value)
+                break;
+            case 'clear':
+                execClear()
+                break;
+            case 'back':
+                execBack()
+                break
+            case 'delete':
+                execDelete()
+                break
+            case 'copy-child':
+                execCopyChild()
+                break
+            case 'before':
+                execBefore()
+                break
+            case 'after':
+                execAfter()
+                break
+        }
+        $textarea.ActiveValues = null
+    })
+    function execClear() {
+        if (!$textarea.value) {
+            toast.warn('已经清空啦')
+            return
+        }
+        dataStack.push(editor.get())
+        $textarea.value = ''
+        $textarea.dispatchEvent(new Event('input'))
+    }
+    function execDelete() {
+        // 删除数组中的一项
+        // TODO: 删除对象的某个属性,待看看反馈是否需要
+        const data = $textarea.ActiveValues
+        if (!data?.length) {
+            toast.error('请选择要删除的内容')
+            return
+        }
+        const lastData = data[data.length - 1]
+        const _index = data.findIndex(v => v instanceof Array)
+        if (_index === -1) {
+            toast.error('此节点无法删除,请使用json更改')
+            return
+        }
+        const d1 = data[_index]
+        let key = data[_index - 1]
+        if (key instanceof Object) {
+            key = d1.findIndex((v) => v === key)
+        }
+
+        if (d1 instanceof Array) {
+            dataStack.push(editor.get())
+            d1.splice(key, 1)
+            updatePage(lastData, true)
+            return
+        }
+    }
+    function execBack() {
+        if (dataStack.length === 0) {
+            toast.warn('没有可回退的内容')
+            setTimeout(() => {
+                toast.info('注:只能回退按钮操作')
+            }, 1300)
+            return
+        }
+        const t = dataStack.pop()
+        updatePage(t, true)
+    }
+    function execCopyChild() {
+        const data = $textarea.ActiveValues
+        if (!data?.length) {
+            toast.error('请选择要拷贝的内容')
+            return
+        }
+        const lastData = data[data.length - 1]
+        const _index = data.findIndex(v => v instanceof Array)
+        if (_index === -1) {
+            toast.error('此节点无法拷贝,请使用json更改')
+            return
+        }
+        const d1 = data[_index]
+        let key = data[_index - 1]
+        if (key instanceof Object) {
+            key = d1.findIndex((v) => v === key)
+        }
+
+        if (d1 instanceof Array) {
+            dataStack.push(editor.get())
+            d1.splice(key, 0, cloneValue(d1[key]))
+            updatePage(lastData, true)
+            return
+        }
+    }
+    function execBefore() {
+        const data = $textarea.ActiveValues
+        if (!data?.length) {
+            toast.error('请选择要移动的内容')
+            return
+        }
+        const lastData = data[data.length - 1]
+        const _index = data.findIndex(v => v instanceof Array)
+        if (_index === -1) {
+            toast.error('此节点无法移动,请使用json更改')
+            return
+        }
+        const d1 = data[_index]
+        let key = data[_index - 1]
+        if (key instanceof Object) {
+            key = d1.findIndex((v) => v === key)
+        }
+        if (key === 0) {
+            toast.warn('已经在最前面啦')
+            return
+        }
+        if (d1 instanceof Array) {
+            dataStack.push(editor.get());
+            ([d1[key], d1[key - 1]] = [d1[key - 1], d1[key]])
+            updatePage(lastData, true)
+            return
+        }
+    }
+
+    function execAfter() {
+        const data = $textarea.ActiveValues
+        if (!data?.length) {
+            toast.error('请选择要移动的内容')
+            return
+        }
+        const lastData = data[data.length - 1]
+        const _index = data.findIndex(v => v instanceof Array)
+        if (_index === -1) {
+            toast.error('此节点无法移动,请使用json更改')
+            return
+        }
+        const d1 = data[_index]
+        let key = data[_index - 1]
+        if (key instanceof Object) {
+            key = d1.findIndex((v) => v === key)
+        }
+        if (key === d1.length - 1) {
+            toast.warn('已经在最后面啦')
+            return
+        }
+        if (d1 instanceof Array) {
+            dataStack.push(editor.get());
+            ([d1[key], d1[key + 1]] = [d1[key + 1], d1[key]])
+            updatePage(lastData, true)
+            return
+        }
+    }
+}
+function registerTextAreaInput() {
+
+    const $textarea = document.getElementById('domContext')
+    $textarea.addEventListener('focusout', () => {
+        // $textarea.setAttribute('disabled', 'disabled')
+        // 便于触发点击事件
+        // TODO: 优化异步setTimeout的执行顺序
+        setTimeout(() => {
+            $textarea.classList.toggle('focus')
+            resetToolsBtnStatus(true)
+        }, 150)
+    })
+    $textarea.addEventListener('focus', function () {
+        $textarea.classList.toggle('focus')
+        resetToolsBtnStatus()
+    })
+    $textarea.addEventListener('input', debounce(function (e) {
+        // TODO: continue
+        // console.log(e.target.valuePath);
         if (!editor.searchBox?.activeResult?.node) {
             return
         }
@@ -188,6 +435,7 @@ function registerTextAreaInput() {
 
         // 更新editor
         editor.searchBox.activeResult.node.value = this.value
+        editor.searchBox.activeResult.node.dom.value.click()
         editor.refresh()
 
         // 更新到本地
@@ -288,6 +536,8 @@ function scalePage(width) {
     if (width <= 1200) {
         const pageHeight = document.getElementById('page').getBoundingClientRect().height
         document.getElementsByClassName('right')[0].style.top = `${pageHeight}px`
+    } else {
+        document.getElementsByClassName('right')[0].style.top = ''
     }
 }
 
@@ -336,10 +586,10 @@ function refreshIframePage(isReload = false) {
 /**
  * 更新子页面
  */
-function updatePage(data) {
+function updatePage(data, isReload = false) {
     initObserver()
     setSchema(data, getPageKey())
-    refreshIframePage()
+    refreshIframePage(isReload)
 }
 
 /**
@@ -390,6 +640,14 @@ function initEditor(id, mode = 'tree') {
                 clearTimeout(timer)
             }
             setTimeout(updatePage, 200, editor.get())
+        },
+        limitDragging: true,
+        modes: ['tree', 'code'],
+        name: 'root',
+        onEvent(data, e) {
+            if (e.type === 'click' && document.activeElement.id === 'domContext') {
+                document.activeElement.valuePath = data.path
+            }
         },
         mode
     })

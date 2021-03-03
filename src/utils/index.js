@@ -185,3 +185,10 @@ export function Dom2PDF(dom, filename) {
 
     })
 }
+
+export function cloneValue(value) {
+    if (value instanceof Object) {
+        return JSON.parse(JSON.stringify(value))
+    }
+    return value
+}
