@@ -108,6 +108,7 @@ function initNav(defaultPage = getActivePageKey() || 'react1') {
         // 清空历史操作栈
         dataStack.splice(0, dataStack.length)
         document.getElementById('domContext').ActiveValues = null
+        document.getElementById('domContext').value = ''
         // iframe中打开
         if (e.target.tagName.toLowerCase() === 'a') {
             e.preventDefault()
@@ -143,6 +144,10 @@ function registerIframePageLoad() {
             const clickText = $target.textContent.trim()
             const matchDoms = traverseDomTreeMatchStr(document.getElementById('page').contentDocument.body, clickText)
             const mathIndex = matchDoms.findIndex(v => v === $target)
+            if ($target.tagName.toLowerCase() === 'a') {
+                e.preventDefault()
+            }
+
             if (editor.mode === 'code') {
                 changeEditorMode('tree')
             }
