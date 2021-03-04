@@ -1,5 +1,6 @@
 import React from 'react'
-
+import svgList from './../../../constants/svgs'
+const $svgList = svgList('#3b8fcb')
 export default function OtherInfo(props) {
     const { infos } = props
     return (
@@ -8,13 +9,13 @@ export default function OtherInfo(props) {
                 {
                     infos.map(({ icon, value }, i) => {
                         return <li key={i}>
-                            <i className={"icon iconfont " + `icon-${icon}`} />
+                            <i dangerouslySetInnerHTML={{ __html: $svgList[icon] }} />
                             <span>{value}</span>
                         </li>
                     })
                 }
 
             </ul>
-        </div>
+        </div >
     )
 }

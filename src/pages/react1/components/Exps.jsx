@@ -8,7 +8,8 @@ export default function Exps(props) {
                 exps.map((exp, i) => {
                     const { title, values = [] } = exp
                     return <li className="exp" key={i}>
-                        <h3>{title}</h3>
+                        <div className="h3">{title}</div>
+                        <div className="hr"></div>
                         {
                             values.map((v, j) => {
                                 const { des, introduce } = v

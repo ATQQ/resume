@@ -172,14 +172,17 @@ export function TransferAllImgToBase64(dom) {
 
 export function Dom2PDF(dom, filename) {
     TransferAllImgToBase64(dom).then(() => {
-        window.html2canvas(dom).then(canvas => {
+        window.html2canvas(dom, {
+            dpi: 300,
+            scale: 2
+        }).then(canvas => {
             //返回图片dataURL，参数：图片格式和清晰度(0-1)
-            var pageData = canvas.toDataURL('image/jpeg', 1.0);
+            const pageData = canvas.toDataURL('image/jpeg', 1.0);
             //方向默认竖直，尺寸ponits，格式a4[595.28,841.89]
-            var doc = new window.jspdf.jsPDF('', 'pt', 'a4');
+            const doc = new window.jspdf.jsPDF('', 'pt', 'a4');
             //addImage后两个参数控制添加图片的尺寸，此处将页面高度按照a4纸宽高比列进行压缩
-            // doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 592.28 / canvas.width * canvas.height);
-            doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 841.89);
+            doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 592.28 / canvas.width * canvas.height);
+            // doc.addImage(pageData, 'JPEG', 0, 0, 595.28, 841.89);
             doc.save(filename);
         });
 

@@ -36,10 +36,8 @@ header {
         align-items: center;
       }
       i {
-        color: $themeColor;
-        font-weight: bold;
-        font-size: 1.5rem;
         margin-right: 0.5rem;
+        height: 1.5rem;
       }
       span {
         font-weight: normal;
@@ -66,17 +64,23 @@ header {
   .exp {
     margin-top: 0.5rem;
   }
-  h3 {
+  div.h3 {
     color: $themeColor;
     font-size: 1.5rem;
+    line-height: 1.5rem;
     font-weight: normal;
     padding-left: 0.5rem;
+  }
+  div.h3 + div.hr {
+    margin-top: 0.5rem;
+    border-width: 0;
+    border-bottom: 2px solid $themeColor;
     position: relative;
-    padding-bottom: 0.1rem;
+    overflow: initial;
     &::before {
       content: '';
       position: absolute;
-      transform: translateY(50%);
+      transform: translateY(60%);
       left: 0;
       bottom: 0;
       display: block;
@@ -84,15 +88,6 @@ header {
       height: 0.5rem;
       border-radius: 50%;
       background-color: $themeColor;
-    }
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 100%;
-      border-bottom: 2px solid
-        $themeColor;
     }
   }
   p.des {
@@ -110,4 +105,11 @@ header {
     margin-top: 0.5rem;
     font-size: 0.8rem;
   }
+}
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  // vertical-align: -0.15rem;
+  fill: currentColor;
+  overflow: hidden;
 }
