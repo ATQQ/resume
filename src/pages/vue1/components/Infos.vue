@@ -9,10 +9,7 @@
         :key="i"
       >
         <!-- 图标 -->
-        <i
-          class="icon iconfont"
-          :class="'icon-' + icon"
-        />
+        <i v-html="svg[icon]"> </i>
         <!-- 内容 -->
         <span>{{ value }}</span>
       </li>
@@ -21,6 +18,9 @@
 </template>
 
 <script>
+import svgList from './../../../constants/svgs';
+const svg = svgList('#fff');
+
 export default {
   name: 'infos',
   props: {
@@ -28,6 +28,11 @@ export default {
       type: Array,
       default: [],
     },
+  },
+  data() {
+    return {
+      svg,
+    };
   },
 };
 </script>

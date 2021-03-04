@@ -43,13 +43,23 @@ header {
     justify-content: space-around;
     list-style: none;
     margin-top: 1rem;
+    li {
+      display: flex;
+      align-items: center;
+    }
     i {
+      margin-right: 0.5rem;
+      height: 1.6rem;
+    }
+    .icon {
+      width: 1rem;
+      height: 1rem;
+      // vertical-align: -0.15rem;
+      fill: currentColor;
+      overflow: hidden;
+      background-color: $themeColor;
       border-radius: 50%;
       padding: 0.3rem;
-      color: #fff;
-      font-weight: bold;
-      background-color: $themeColor;
-      margin-right: 0.5rem;
     }
     span {
       color: $themeColor;
