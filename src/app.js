@@ -144,7 +144,7 @@ function registerIframePageLoad() {
             const clickText = $target.textContent.trim()
             const matchDoms = traverseDomTreeMatchStr(document.getElementById('page').contentDocument.body, clickText)
             const mathIndex = matchDoms.findIndex(v => v === $target)
-            if ($target.tagName.toLowerCase() === 'a') {
+            if ($target.tagName.toLowerCase() === 'a'&&!$target.dataset.open) {
                 e.preventDefault()
             }
 

@@ -22,6 +22,7 @@ module.exports = {
         filename: 'js/[name]-[contenthash:8].js',
         path: path.resolve(__dirname, './../dist')
     },
+    // target: ['web', 'es5'],
     resolve: {
         extensions: [".js", '.jsx', '.vue'],
         alias: {

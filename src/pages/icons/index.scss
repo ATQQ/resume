@@ -1,0 +1,51 @@
+@import './../../assets/css/base.scss';
+html,
+body,
+#resume {
+  height: 100%;
+  overflow: hidden;
+}
+$themeColor: #3b8fcb;
+#resume {
+  padding: 1rem 2rem;
+}
+header {
+  padding: 1rem 0;
+  overflow: hidden;
+  h1 {
+    text-align: center;
+  }
+}
+
+ul {
+  text-align: center;
+  list-style: none;
+}
+.icon-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+}
+.icon-item {
+  color: #666;
+  cursor: pointer;
+  min-width: 14%;
+  i {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: block;
+    margin: 0 auto;
+  }
+  .name {
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+  margin: 1rem;
+}
+.icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  // vertical-align: -0.15rem;
+  fill: currentColor;
+  overflow: hidden;
+}
