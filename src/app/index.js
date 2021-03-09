@@ -1,5 +1,5 @@
 // TODO: 拆分此文件
-import './assets/css/app.scss'
+import '../assets/css/app.scss'
 import html2canvas from 'html2canvas'
 import {
   createLink,
@@ -15,14 +15,45 @@ import {
   createEmptySpan,
   Dom2PDF,
   cloneValue,
-} from './utils'
-import { navTitle } from './constants'
-import { toast } from './components/Toast'
+} from '../utils'
+import { navTitle } from '../constants'
+import { toast } from '../components/Toast'
 
 window.html2canvas = html2canvas
 
 // json编辑器
 let editor = initEditor('jsonEditor')
+
+// 点击的那一个
+const clickObjEditor = (() => {
+  let timer = null
+  // eslint-disable-next-line no-undef
+  return new JSONEditor(document.getElementById('clickEditor'), {
+    onChange() {
+      if (timer) {
+        clearTimeout(timer)
+      }
+      if (!document.getElementById('domContext').ActiveValues) {
+        return
+      }
+      timer = setTimeout(() => {
+        const path = document.getElementById('domContext').activeObjPath
+        const json = editor.get()
+        let temp = json
+        path.forEach((key, i) => {
+          if (i + 1 === path.length) {
+            temp[key] = clickObjEditor.get()
+            editor.set(json)
+            updatePage(json)
+          } else {
+            temp = temp[key]
+          }
+        })
+      }, 200)
+    },
+    modes: ['tree', 'code'],
+  })
+})()
 // 操作栈
 const dataStack = []
 
@@ -251,7 +282,10 @@ function resetToolsBtnStatus(disabledAll = false) {
   }
   setTimeout(() => {
     const $textarea = document.getElementById('domContext')
-    if (!$textarea.clickDom) return
+    $textarea.ActiveValues = null
+    if (!$textarea.clickDom) {
+      return
+    }
 
     const { json, path } = getNowActiveValues()
     // 默认允许 取消,复制内容,清空,回退
@@ -457,6 +491,29 @@ function registerTextAreaInput() {
   $textarea.addEventListener('focus', () => {
     $textarea.classList.toggle('focus')
     resetToolsBtnStatus()
+
+    setTimeout(() => {
+      const activeData = $textarea.ActiveValues
+      if (!activeData || activeData.length <= 1) {
+        return
+      }
+      const lastData = activeData[activeData.length - 1]
+      const { path } = getNowActiveValues()
+      for (const obj of activeData) {
+        if (obj instanceof Object) {
+          path.reduce((pre, key, idx) => {
+            pre = pre[key]
+            if (pre === obj) {
+              // TODO: flag
+              $textarea.activeObjPath = path.slice(0, idx + 1)
+              clickObjEditor.set(obj)
+            }
+            return pre
+          }, lastData)
+          break
+        }
+      }
+    }, 150)
   })
   $textarea.addEventListener(
     'input',
