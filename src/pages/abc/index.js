@@ -47,7 +47,7 @@ import './index.scss'
 Vue.config.productionTip = process.env.NODE_ENV === 'development'
 
 new Vue({
-    render: h => h(App)
+  render: (h) => h(App),
 }).$mount('#app')
 
 // import React from 'react'
