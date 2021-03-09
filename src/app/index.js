@@ -15,7 +15,16 @@ import {
   cloneValue,
 } from '../utils'
 import { toast } from '../components/Toast'
-import { jsonDataStack, scrollIntoView } from '../utils/public'
+import {
+  jsonDataStack,
+  scrollIntoView,
+  setSessionStorage,
+  toggleControlPanel,
+  getNowActivePath,
+  updatePage,
+  initObserver,
+  refreshIframePage,
+} from './modules/public'
 import initHeaderNav from './modules/header'
 
 window.html2canvas = html2canvas
@@ -134,7 +143,9 @@ function registerIframePageLoad() {
             setTimeout(() => {
               $textarea.style.boxShadow = ''
             }, 200)
-            editor.searchBox.activeResult.node.dom.value.click()
+            // TODO: 忘记干什么的了
+            // console.log(editor.searchBox.activeResult.node)
+            // editor.searchBox.activeResult.node.dom.value.click()
             return
           }
         }
@@ -148,26 +159,7 @@ function registerIframePageLoad() {
   }
 }
 
-// function activeToolsBtn(dataType) {
-//   const $btn = document.querySelector(`button[data-type="${dataType}"]`)
-//   $btn.classList.remove('disabled')
-//   $btn.removeAttribute('disabled', 'disabled')
-// }
-
-function getNowActiveValues() {
-  const json = editor.get()
-  const path = document.getElementById('domContext').valuePath
-  return {
-    json,
-    path,
-  }
-}
-
 function resetToolsBtnStatus(disabledAll = false) {
-  // document.querySelectorAll('.tools .left button').forEach(btn => {
-  //     btn.classList.add('disabled')
-  //     btn.setAttribute('disabled', 'disabled')
-  // })
   if (disabledAll) {
     return
   }
@@ -177,13 +169,8 @@ function resetToolsBtnStatus(disabledAll = false) {
     if (!$textarea.clickDom) {
       return
     }
-
-    const { json, path } = getNowActiveValues()
-    // 默认允许 取消,复制内容,清空,回退
-    // activeToolsBtn('cancel')
-    // activeToolsBtn('copy')
-    // activeToolsBtn('clear')
-    // activeToolsBtn('back')
+    const json = editor.get()
+    const path = getNowActivePath()
 
     // 最外层值类型 - 不提供额外操作
     if (!path || path.length === 1) {
@@ -389,7 +376,7 @@ function registerTextAreaInput() {
         return
       }
       const lastData = activeData[activeData.length - 1]
-      const { path } = getNowActiveValues()
+      const path = getNowActivePath()
       for (const obj of activeData) {
         if (obj instanceof Object) {
           path.reduce((pre, key, idx) => {
@@ -410,7 +397,6 @@ function registerTextAreaInput() {
     'input',
     debounce(function () {
       // TODO: continue
-      // console.log(e.target.valuePath);
       if (!editor.searchBox?.activeResult?.node) {
         return
       }
@@ -464,15 +450,7 @@ function registerJSPDF() {
     Dom2PDF(dom, `${Date.now()}.pdf`)
   })
 }
-function toggleControlPanel(hide = true) {
-  if (hide) {
-    // hide control panel
-    document.getElementsByClassName('right')[0].setAttribute('hidden', 'hidden')
-    return
-  }
-  // hide control panel
-  document.getElementsByClassName('right')[0].removeAttribute('hidden')
-}
+
 /**
  * 激活重置按钮
  */
@@ -512,28 +490,6 @@ function storageActivePagePath() {
   localStorage.setItem('lastActivePage', getPageKey())
 }
 
-function refreshIframePage(isReload = false) {
-  const page = document.getElementById('page')
-  if (isReload) {
-    page.contentWindow.location.reload()
-    return
-  }
-  if (page.contentWindow.refresh) {
-    page.contentWindow.refresh()
-    return
-  }
-  page.contentWindow.location.reload()
-}
-
-/**
- * 更新子页面
- */
-function updatePage(data, isReload = false) {
-  initObserver()
-  setSchema(data, getPageKey())
-  refreshIframePage(isReload)
-}
-
 /**
  * 切换json编辑器的模式
  */
@@ -548,28 +504,6 @@ function changeEditorMode(mode) {
   editor.destroy()
   editor = initEditor('jsonEditor', mode)
   editor.set(getSchema(getPageKey()))
-}
-/**
- * 高亮变化的Dom
- */
-function initObserver() {
-  const config = { childList: true, subtree: true, characterData: true }
-  const observer = new MutationObserver(
-    debounce((mutationsList) => {
-      for (const e of mutationsList) {
-        let { target } = e
-        if (e.type === 'characterData') {
-          target = e.target.parentElement
-        }
-        highLightDom(target)
-      }
-    }, 100),
-  )
-
-  observer.observe(document.getElementById('page').contentDocument.body, config)
-  setTimeout(() => {
-    observer.disconnect()
-  }, 0)
 }
 
 /**
@@ -591,7 +525,7 @@ function initEditor(id, mode = 'tree') {
     name: 'root',
     onEvent(data, e) {
       if (e.type === 'click' && document.activeElement.id === 'domContext') {
-        document.activeElement.valuePath = data.path
+        setSessionStorage('valuePath', data.path)
       }
     },
     mode,

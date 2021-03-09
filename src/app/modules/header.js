@@ -1,6 +1,6 @@
 import { createEmptySpan, createLink, debounce } from '../../utils'
 import { navTitle } from '../../constants'
-import { jsonDataStack, scalePage } from '../../utils/public'
+import { jsonDataStack, scalePage } from './public'
 
 const dataStack = jsonDataStack
 
