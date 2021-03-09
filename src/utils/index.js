@@ -195,3 +195,7 @@ export function cloneValue(value) {
   }
   return value
 }
+
+export function getPageKey() {
+  return getPathnameKey(document.getElementById('page').contentWindow.location.pathname)
+}
