@@ -99,6 +99,9 @@ export function updatePage(data, isReload = false) {
 export function initObserver() {
   const config = { childList: true, subtree: true, characterData: true }
   const $pageBody = document.getElementById('page').contentDocument.body
+  if (!$pageBody) {
+    return
+  }
   const observer = new MutationObserver(
     debounce((mutationsList) => {
       for (const e of mutationsList) {

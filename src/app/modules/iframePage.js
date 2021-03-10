@@ -1,9 +1,12 @@
 import {
   getPageKey, getSchema, highLightDom, traverseDomTreeMatchStr,
 } from '../../utils'
-import { scrollIntoView, toggleControlPanel } from './public'
+import {
+  getSessionStorage, scrollIntoView, setSessionStorage, toggleControlPanel,
+} from './public'
 import editor from './schemaEditor'
 import clickObjEditor from './clickObjEditor'
+import { getTextArea } from './textArea'
 
 function registerIframePageLoad() {
   document.getElementById('page').onload = (e) => {
@@ -35,14 +38,12 @@ function registerIframePageLoad() {
       }
       // 解除上次点击的
       // TODO: 优化
-      const $textarea = document.getElementById('domContext')
-      highLightDom($textarea.clickDom, 0)
+      const $textarea = getTextArea()
+      highLightDom(getSessionStorage('clickDom'), 0)
       // 高亮这次的10s
       highLightDom($target, 10000)
       // 更新editor中的search内容
       editor.search(clickText)
-      // editor.searchBox.dom.search.value = clickText
-      // editor.searchBox.dom.search.dispatchEvent(new Event('change'))
 
       // 更新到textarea中的内容
       $textarea.value = clickText
@@ -52,7 +53,7 @@ function registerIframePageLoad() {
         setTimeout(scrollIntoView, 0, $target)
       }
       // 记录点击的dom
-      $textarea.clickDom = e.target
+      setSessionStorage('clickDom', e.target)
       let i = -1
       for (const r of editor.searchResults) {
         if (r.node.value === clickText) {

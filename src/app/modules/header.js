@@ -1,6 +1,7 @@
 import { createEmptySpan, createLink, debounce } from '../../utils'
 import { navTitle } from '../../constants'
 import { jsonDataStack, scalePage } from './public'
+import { getTextArea } from './textArea'
 
 const dataStack = jsonDataStack
 
@@ -87,8 +88,9 @@ export default function initNav(defaultPage = getActivePageKey() || 'react1') {
 
     // 清空历史操作栈
     dataStack.clear()
-    document.getElementById('domContext').ActiveValues = null
-    document.getElementById('domContext').value = ''
+    const $textarea = getTextArea()
+    $textarea.ActiveValues = null
+    $textarea.value = ''
     // iframe中打开
     if (e.target.tagName.toLowerCase() === 'a') {
       e.preventDefault()

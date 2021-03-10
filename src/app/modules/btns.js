@@ -13,7 +13,8 @@ import { toast } from '../../components/Toast'
 
 // 点击部分的json编辑器
 import clickObjEditor from './clickObjEditor'
-import { refreshIframePage } from './public'
+import { getSessionStorage, refreshIframePage } from './public'
+import { getTextArea } from './textArea'
 
 /**
  * 激活重置按钮
@@ -29,7 +30,7 @@ export function registerResetBtn() {
       editor.set(data)
       clickObjEditor.set({})
       refreshIframePage(true)
-      document.getElementById('domContext').value = ''
+      getTextArea().value = ''
     }
   })
 }
@@ -67,7 +68,7 @@ export function registerPCPrint() {
   // 打印 - 导出pdf
   document.getElementById('print').addEventListener('click', () => {
     // 解除高亮
-    highLightDom(document.getElementById('domContext').clickDom, 0)
+    highLightDom(getSessionStorage('clickDom'), 0)
 
     if (window.print) {
       window.print()
@@ -83,7 +84,7 @@ export function registerJSPDF() {
     const dom = document.getElementById('page').contentDocument.body
     if (!dom) return
     // 解除高亮
-    highLightDom(document.getElementById('domContext').clickDom, 0)
+    highLightDom(getSessionStorage('clickDom'), 0)
     Dom2PDF(dom, `${Date.now()}.pdf`)
   })
 }

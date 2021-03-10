@@ -12,9 +12,8 @@ import editor from './schemaEditor'
 
 const dataStack = jsonDataStack
 
-function registerInputToolsBtn() {
+export function registerInputToolsBtn() {
   // TODO: 优化冗余代码
-  resetToolsBtnStatus(true)
   const $textarea = document.getElementById('domContext')
   document.querySelector('.tools').addEventListener('click', (e) => {
     if (e.target.tagName.toLowerCase() !== 'button') return
@@ -174,14 +173,13 @@ function registerInputToolsBtn() {
   }
 }
 
-function resetToolsBtnStatus(disabledAll = false) {
+export function resetToolsBtnStatus(disabledAll = false) {
   if (disabledAll) {
     return
   }
   setTimeout(() => {
-    const $textarea = document.getElementById('domContext')
     setSessionStorage('activeValues', null)
-    if (!$textarea.clickDom) {
+    if (!getSessionStorage('clickDom')) {
       return
     }
     const json = editor.get()
@@ -206,5 +204,3 @@ function resetToolsBtnStatus(disabledAll = false) {
     setSessionStorage('activeValues', data)
   }, 100)
 }
-
-export default registerInputToolsBtn
