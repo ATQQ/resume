@@ -12,7 +12,7 @@ class ClickObjEditor {
     let timer = null
     // eslint-disable-next-line no-undef
     this.editor = new JSONEditor(document.getElementById('clickEditor'), {
-      onChange() {
+      onChange: () => {
         if (timer) {
           clearTimeout(timer)
         }
@@ -25,7 +25,7 @@ class ClickObjEditor {
           let temp = json
           path.forEach((key, i) => {
             if (i + 1 === path.length) {
-              temp[key] = ClickObjEditor.get()
+              temp[key] = this.editor.get()
               schemaEditor.set(json)
               updatePage(json)
             } else {
