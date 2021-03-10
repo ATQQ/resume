@@ -73,6 +73,10 @@ export function getNowActivePath() {
 }
 
 export function setSessionStorage(key, value) {
+  if (value === null || value === undefined) {
+    sessionStorage.removeItem(key)
+    return
+  }
   if (value instanceof Object) {
     value = JSON.stringify(value)
   }
@@ -80,7 +84,10 @@ export function setSessionStorage(key, value) {
 }
 
 export function getSessionStorage(key) {
-  const value = sessionStorage.getItem(key) || '{}'
+  const value = sessionStorage.getItem(key)
+  if (!value) {
+    return value
+  }
   return JSON.parse(value)
 }
 

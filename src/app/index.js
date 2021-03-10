@@ -13,24 +13,27 @@ import {
   getPageKey,
   Dom2PDF,
   cloneValue,
+  isEqual,
 } from '../utils'
 import { toast } from '../components/Toast'
 import {
   jsonDataStack,
   scrollIntoView,
-  setSessionStorage,
   toggleControlPanel,
   getNowActivePath,
   updatePage,
   initObserver,
   refreshIframePage,
+  setSessionStorage,
+  getSessionStorage,
 } from './modules/public'
 import initHeaderNav from './modules/header'
-
-window.html2canvas = html2canvas
+import schemaEditor from './modules/schemaEditor'
 
 // json编辑器
-let editor = initEditor('jsonEditor')
+const editor = schemaEditor
+
+window.html2canvas = html2canvas
 
 // 点击的那一个
 const clickObjEditor = (() => {
@@ -41,11 +44,11 @@ const clickObjEditor = (() => {
       if (timer) {
         clearTimeout(timer)
       }
-      if (!document.getElementById('domContext').ActiveValues) {
+      if (!getSessionStorage('activeValues')) {
         return
       }
       timer = setTimeout(() => {
-        const path = document.getElementById('domContext').activeObjPath
+        const path = getSessionStorage('activeObjPath')
         const json = editor.get()
         let temp = json
         path.forEach((key, i) => {
@@ -108,7 +111,7 @@ function registerIframePageLoad() {
       }
 
       if (editor.mode === 'code') {
-        changeEditorMode('tree')
+        editor.changeEditorMode('tree')
       }
       if (mathIndex < 0) {
         return
@@ -120,8 +123,9 @@ function registerIframePageLoad() {
       // 高亮这次的10s
       highLightDom($target, 10000)
       // 更新editor中的search内容
-      editor.searchBox.dom.search.value = clickText
-      editor.searchBox.dom.search.dispatchEvent(new Event('change'))
+      editor.search(clickText)
+      // editor.searchBox.dom.search.value = clickText
+      // editor.searchBox.dom.search.dispatchEvent(new Event('change'))
 
       // 更新到textarea中的内容
       $textarea.value = clickText
@@ -133,7 +137,7 @@ function registerIframePageLoad() {
       // 记录点击的dom
       $textarea.clickDom = e.target
       let i = -1
-      for (const r of editor.searchBox.results) {
+      for (const r of editor.searchResults) {
         if (r.node.value === clickText) {
           i += 1
           // 匹配到json中的节点
@@ -143,15 +147,12 @@ function registerIframePageLoad() {
             setTimeout(() => {
               $textarea.style.boxShadow = ''
             }, 200)
-            // TODO: 忘记干什么的了
-            // console.log(editor.searchBox.activeResult.node)
-            // editor.searchBox.activeResult.node.dom.value.click()
+            // 触发editor onEvent事件-用于捕获path
+            editor.activeResult.node.dom.value.click()
             return
           }
         }
-        editor.searchBox.dom.input
-          .querySelector('.jsoneditor-next')
-          .dispatchEvent(new Event('click'))
+        editor.nextActive()
       }
     })
 
@@ -165,13 +166,12 @@ function resetToolsBtnStatus(disabledAll = false) {
   }
   setTimeout(() => {
     const $textarea = document.getElementById('domContext')
-    $textarea.ActiveValues = null
+    setSessionStorage('activeValues', null)
     if (!$textarea.clickDom) {
       return
     }
     const json = editor.get()
     const path = getNowActivePath()
-
     // 最外层值类型 - 不提供额外操作
     if (!path || path.length === 1) {
       return
@@ -189,10 +189,7 @@ function resetToolsBtnStatus(disabledAll = false) {
       },
       [json],
     )
-    $textarea.ActiveValues = data
-    // 启用拷贝
-    // activeToolsBtn('copy-child')
-    // activeToolsBtn('delete')
+    setSessionStorage('activeValues', data)
   }, 100)
 }
 function registerInputToolsBtn() {
@@ -227,7 +224,7 @@ function registerInputToolsBtn() {
       default:
         break
     }
-    $textarea.ActiveValues = null
+    setSessionStorage('activeValues', null)
   })
   function execClear() {
     if (!$textarea.value) {
@@ -241,7 +238,7 @@ function registerInputToolsBtn() {
   function execDelete() {
     // 删除数组中的一项
     // TODO: 删除对象的某个属性,待看看反馈是否需要
-    const data = $textarea.ActiveValues
+    const data = getSessionStorage('activeValues')
     if (!data?.length) {
       toast.error('请选择要删除的内容')
       return
@@ -276,7 +273,7 @@ function registerInputToolsBtn() {
     updatePage(t, true)
   }
   function execCopyChild() {
-    const data = $textarea.ActiveValues
+    const data = getSessionStorage('activeValues')
     if (!data?.length) {
       toast.error('请选择要拷贝的内容')
       return
@@ -300,7 +297,7 @@ function registerInputToolsBtn() {
     }
   }
   function execBefore() {
-    const data = $textarea.ActiveValues
+    const data = getSessionStorage('activeValues')
     if (!data?.length) {
       toast.error('请选择要移动的内容')
       return
@@ -328,7 +325,7 @@ function registerInputToolsBtn() {
   }
 
   function execAfter() {
-    const data = $textarea.ActiveValues
+    const data = getSessionStorage('activeValues')
     if (!data?.length) {
       toast.error('请选择要移动的内容')
       return
@@ -371,7 +368,7 @@ function registerTextAreaInput() {
     resetToolsBtnStatus()
 
     setTimeout(() => {
-      const activeData = $textarea.ActiveValues
+      const activeData = getSessionStorage('activeValues')
       if (!activeData || activeData.length <= 1) {
         return
       }
@@ -381,9 +378,8 @@ function registerTextAreaInput() {
         if (obj instanceof Object) {
           path.reduce((pre, key, idx) => {
             pre = pre[key]
-            if (pre === obj) {
-              // TODO: flag
-              $textarea.activeObjPath = path.slice(0, idx + 1)
+            if (isEqual(pre, obj)) {
+              setSessionStorage('activeObjPath', path.slice(0, idx + 1))
               clickObjEditor.set(obj)
             }
             return pre
@@ -396,8 +392,7 @@ function registerTextAreaInput() {
   $textarea.addEventListener(
     'input',
     debounce(function () {
-      // TODO: continue
-      if (!editor.searchBox?.activeResult?.node) {
+      if (!editor.activeResult?.node) {
         return
       }
       initObserver()
@@ -405,8 +400,8 @@ function registerTextAreaInput() {
       $textarea.clickDom.textContent = this.value
 
       // 更新editor
-      editor.searchBox.activeResult.node.value = this.value
-      editor.searchBox.activeResult.node.dom.value.click()
+      editor.activeResult.node.value = this.value
+      editor.activeResult.node.dom.value.click()
       editor.refresh()
 
       // 更新到本地
@@ -419,10 +414,10 @@ function registerToggle() {
   // 切换模式
   document.getElementById('toggle').addEventListener('click', () => {
     if (editor.mode === 'tree') {
-      changeEditorMode('code')
+      editor.changeEditorMode('code')
       return
     }
-    changeEditorMode('tree')
+    editor.changeEditorMode('tree')
   })
 }
 
@@ -488,48 +483,4 @@ function registerJSONBtn() {
 
 function storageActivePagePath() {
   localStorage.setItem('lastActivePage', getPageKey())
-}
-
-/**
- * 切换json编辑器的模式
- */
-function changeEditorMode(mode) {
-  if (mode === 'tree') {
-    document.getElementById('toggle').textContent = '切换为编辑模式'
-    document.getElementById('jsonEditor').style.height = ''
-  } else {
-    document.getElementById('toggle').textContent = '切换为树形模式'
-    document.getElementById('jsonEditor').style.height = '50vh'
-  }
-  editor.destroy()
-  editor = initEditor('jsonEditor', mode)
-  editor.set(getSchema(getPageKey()))
-}
-
-/**
- * 初始化JSON编辑器
- * @param {string} id
- */
-function initEditor(id, mode = 'tree') {
-  const timer = null
-  // eslint-disable-next-line no-undef
-  const editor = new JSONEditor(document.getElementById(id), {
-    onChange() {
-      if (timer) {
-        clearTimeout(timer)
-      }
-      setTimeout(updatePage, 200, editor.get())
-    },
-    limitDragging: true,
-    modes: ['tree', 'code'],
-    name: 'root',
-    onEvent(data, e) {
-      if (e.type === 'click' && document.activeElement.id === 'domContext') {
-        setSessionStorage('valuePath', data.path)
-      }
-    },
-    mode,
-  })
-  editor.mode = mode
-  return editor
 }

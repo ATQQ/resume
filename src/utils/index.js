@@ -199,3 +199,98 @@ export function cloneValue(value) {
 export function getPageKey() {
   return getPathnameKey(document.getElementById('page').contentWindow.location.pathname)
 }
+
+export function isObject(a) {
+  return a instanceof Object
+}
+
+export function isValueType(a) {
+  return !isObject(a)
+}
+
+export function isSame(a, b) {
+  // 为什么不用isNaN
+  // 因为isNaN(undefined) 为true
+  // eslint-disable-next-line no-self-compare
+  return a === b || (a !== a && b !== b)
+}
+
+export function isSameType(a, b) {
+  // 两者都是值类型
+  if (typeof a === typeof b && !(a instanceof Object) && !(b instanceof Object)) {
+    return true
+  }
+
+  // 两者都是对象
+  if (a instanceof Object && b instanceof Object) {
+    const aOk = a instanceof Array
+    const bOk = b instanceof Array
+    // 都是数组,或者都不是数组则ok --> aOK === bOk
+    return aOk === bOk
+  }
+  return false
+}
+export function isEqual(a, b) {
+  if (!isSameType(a, b)) {
+    return false
+  }
+  if (isValueType(a)) {
+    return a === b
+  }
+  // 都是数组
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) {
+      return false
+    }
+
+    // 逐项判断
+    for (let i = 0; i < a.length; i += 1) {
+      const _a = a[i]
+      const _b = b[i]
+      // 类型不等
+      if (!isSameType(_a, _b)) {
+        return false
+      }
+
+      // 值类型,值不等
+      if (isValueType(_a) && !isSame(_a, _b)) {
+        return false
+      }
+
+      // 对象 - 递归判断了
+      if (isObject(_a) && !isEqual(_a, _b)) {
+        return false
+      }
+    }
+  } else {
+    // 都是普通对象
+    const aKeys = Reflect.ownKeys(a)
+    const bKeys = Reflect.ownKeys(b)
+
+    // 键数量不一致
+    if (aKeys.length !== bKeys.length) {
+      return false
+    }
+
+    for (const aKey of aKeys) {
+      const _a = a[aKey]
+      const _b = b[aKey]
+      // 类型不等
+      if (!isSameType(_a, _b)) {
+        return false
+      }
+
+      // 值类型,值不等
+      if (isValueType(_a) && !isSame(_a, _b)) {
+        return false
+      }
+
+      // 对象 - 递归判断了
+      if (isObject(_a) && !isEqual(_a, _b)) {
+        return false
+      }
+    }
+  }
+
+  return true
+}
