@@ -56,7 +56,6 @@ export function registerInputToolsBtn() {
     $textarea.dispatchEvent(new Event('input'))
   }
   function execDelete() {
-    // 删除数组中的一项
     // TODO: 删除对象的某个属性,待看看反馈是否需要
     const data = getSessionStorage('activeValues')
     if (!data?.length) {

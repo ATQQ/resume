@@ -16,7 +16,6 @@ export function getTextArea() {
 export function registerTextAreaInput() {
   const $textarea = getTextArea()
   $textarea.addEventListener('focusout', () => {
-    // $textarea.setAttribute('disabled', 'disabled')
     // 便于触发点击事件
     // TODO: 优化异步setTimeout的执行顺序
     setTimeout(() => {

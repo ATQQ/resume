@@ -37,7 +37,6 @@ function registerIframePageLoad() {
         return
       }
       // 解除上次点击的
-      // TODO: 优化
       const $textarea = getTextArea()
       highLightDom(getSessionStorage('clickDom'), 0)
       // 高亮这次的10s

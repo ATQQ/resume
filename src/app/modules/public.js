@@ -63,7 +63,6 @@ export function toggleControlPanel(hide = true) {
     document.getElementsByClassName('right')[0].setAttribute('hidden', 'hidden')
     return
   }
-  // hide control panel
   document.getElementsByClassName('right')[0].removeAttribute('hidden')
 }
 
