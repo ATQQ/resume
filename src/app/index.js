@@ -28,43 +28,15 @@ import {
   getSessionStorage,
 } from './modules/public'
 import initHeaderNav from './modules/header'
-import schemaEditor from './modules/schemaEditor'
 
-// json编辑器
-const editor = schemaEditor
+// 完整的json编辑器
+import editor from './modules/schemaEditor'
+
+// 点击部分的json编辑器
+import clickObjEditor from './modules/clickObjEditor'
 
 window.html2canvas = html2canvas
 
-// 点击的那一个
-const clickObjEditor = (() => {
-  let timer = null
-  // eslint-disable-next-line no-undef
-  return new JSONEditor(document.getElementById('clickEditor'), {
-    onChange() {
-      if (timer) {
-        clearTimeout(timer)
-      }
-      if (!getSessionStorage('activeValues')) {
-        return
-      }
-      timer = setTimeout(() => {
-        const path = getSessionStorage('activeObjPath')
-        const json = editor.get()
-        let temp = json
-        path.forEach((key, i) => {
-          if (i + 1 === path.length) {
-            temp[key] = clickObjEditor.get()
-            editor.set(json)
-            updatePage(json)
-          } else {
-            temp = temp[key]
-          }
-        })
-      }, 200)
-    },
-    modes: ['tree', 'code'],
-  })
-})()
 // 操作栈
 const dataStack = jsonDataStack
 
@@ -298,6 +270,7 @@ function registerInputToolsBtn() {
   }
   function execBefore() {
     const data = getSessionStorage('activeValues')
+    console.log(data)
     if (!data?.length) {
       toast.error('请选择要移动的内容')
       return

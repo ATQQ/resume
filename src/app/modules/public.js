@@ -71,24 +71,17 @@ export function getNowActivePath() {
   const path = getSessionStorage('valuePath')
   return path
 }
-
+const sessionMap = new Map()
 export function setSessionStorage(key, value) {
   if (value === null || value === undefined) {
-    sessionStorage.removeItem(key)
+    sessionMap.delete(key)
     return
   }
-  if (value instanceof Object) {
-    value = JSON.stringify(value)
-  }
-  sessionStorage.setItem(key, value)
+  sessionMap.set(key, value)
 }
 
 export function getSessionStorage(key) {
-  const value = sessionStorage.getItem(key)
-  if (!value) {
-    return value
-  }
-  return JSON.parse(value)
+  return sessionMap.get(key)
 }
 
 /**
