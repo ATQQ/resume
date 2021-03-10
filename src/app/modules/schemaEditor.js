@@ -43,6 +43,10 @@ class SchemaEditor {
     this.editor.searchBox.dom.search.dispatchEvent(new Event('change'))
   }
 
+  get mode() {
+    return this.editor.mode
+  }
+
   get searchResults() {
     return this.editor.searchBox.results
   }
@@ -64,7 +68,7 @@ class SchemaEditor {
       document.getElementById('jsonEditor').style.height = '50vh'
     }
     this.editor.destroy()
-    this.editor = this.initEditor('jsonEditor', mode)
+    this.init('jsonEditor', mode)
     this.editor.set(getSchema(getPageKey()))
   }
 
