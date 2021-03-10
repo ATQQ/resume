@@ -3,6 +3,7 @@ import {
 } from '../../utils'
 import { scrollIntoView, toggleControlPanel } from './public'
 import editor from './schemaEditor'
+import clickObjEditor from './clickObjEditor'
 
 function registerIframePageLoad() {
   document.getElementById('page').onload = (e) => {
@@ -10,6 +11,8 @@ function registerIframePageLoad() {
     toggleControlPanel(false)
     // 初始化json编辑器内容
     editor.set(getSchema(getPageKey()))
+    // 初始化
+    clickObjEditor.set({})
 
     // 获取点击到的内容
     e.path[0].contentDocument.body.addEventListener('click', (e) => {
