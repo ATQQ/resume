@@ -55,8 +55,10 @@ npm run build
 │   ├── vue1            - vue编写的简历
 │   └── introduce       - 应用的使用文档
 ├── utils
-├── app.js          项目的入口js
-├── index.html      项目的入口页面
+├── app
+│   ├── index.js        项目的入口js
+│   └── index.html      项目的入口页面
+│
 ```
 ## 新增模板
 目前对于框架接入了React/Vue的支持，其余框架（如Angular）在后续有需求可接入
