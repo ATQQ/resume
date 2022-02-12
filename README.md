@@ -21,7 +21,9 @@ cd resume
 ```
 2. 安装依赖
 ```shell
-npm install
+npm i -g pnpm
+
+pnpm install
 ```
 3. 本地运行
 ```shell
