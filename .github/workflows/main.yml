@@ -45,18 +45,18 @@ jobs:
       - name: Build
         run: |
           echo 开始----构建
-          npm run build
+          pnpm build
       - name: Compress dist
         run: |
           echo 开始----压缩
-          npm run compress
+          pnpm compress
       # 上传压缩的内容
       - name: Upload package
         run: |
           echo 开始---上传
-          npm run upload
+          pnpm upload
       # 部署上传的包
       - name: Deploy
         run: |
           echo 开始----部署
-          npm run deploy
+          pnpm deploy
