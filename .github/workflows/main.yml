@@ -47,8 +47,8 @@ jobs:
       # 上传压缩的内容
       - name: Upload package
         run: |
-        echo 开始---上传
-        npm run upload
+          echo 开始---上传
+          npm run upload
       # 部署上传的包
       - name: Deploy
         run: |
