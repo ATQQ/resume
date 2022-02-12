@@ -35,10 +35,10 @@ jobs:
       - name: Install dependence
         run: |
           echo 开始----安装依赖
-          npm install
+          pnpm install
       - name: Build
         run: |
-          echo 开始----安装依赖
+          echo 开始----构建
           npm run build
       - name: Compress dist
         run: |
@@ -46,14 +46,9 @@ jobs:
           npm run compress
       # 上传压缩的内容
       - name: Upload package
-        uses: easingthemes/ssh-deploy@v2.1.5
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.ACCESS_TOKEN }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "resume.tar.gz"
-          REMOTE_HOST: ${{ secrets.REMOTE_ORIGIN }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ secrets.TARGET }}
+        run: |
+        echo 开始---上传
+        npm run upload
       # 部署上传的包
       - name: Deploy
         run: |
